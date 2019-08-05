@@ -28,7 +28,7 @@ api = Api(app)
 class Temperature(Resource):
 	def get(self):
 		global deviceInfo
-		temp = deviceInfo.getCPUTemperature()
+		temp = deviceInfo.getTemperature()
 		ret = {'temperature': temp}
 		return jsonify(ret)
 

@@ -19,7 +19,7 @@ class Sensors:
 			raise Exception(error)
 		return output
 
-	def getCPUTemperature(self):
+	def getTemperature(self):
 		# check how many cpus we have
 		cpuJson = self.__bashCommand("lscpu -J")
 		lscpu = json.loads(cpuJson)
