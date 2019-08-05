@@ -11,14 +11,14 @@ from flask import Flask, request
 from flask_restful import Resource, Api
 from json import dumps
 from flask import jsonify
-from sensors import Sensors
+from deviceInfo import DeviceInfo
 
 # Creating a greengrass core sdk client
 #client = greengrasssdk.client('iot-data')
 # Retrieving platform information to send from Greengrass Core
 my_platform = platform.platform()
 # global sensor
-deviceInfo = Sensors()
+deviceInfo = DeviceInfo()
 
 # flask route
 app = Flask(__name__)

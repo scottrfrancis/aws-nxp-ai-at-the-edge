@@ -5,7 +5,7 @@
 import subprocess
 import json
 
-class Sensors:
+class DeviceInfo:
 	def __init__(self):
 		self.__temperature = 0.0
 		self.__cpu = 0
