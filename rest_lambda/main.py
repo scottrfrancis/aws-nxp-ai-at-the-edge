@@ -3,7 +3,7 @@
 #
 
 # greengrass
-import greengrasssdk
+#import greengrasssdk
 import platform
 
 # flask
@@ -11,30 +11,24 @@ from flask import Flask, request
 from flask_restful import Resource, Api
 from json import dumps
 from flask import jsonify
+from sensors import Sensors
 
 # Creating a greengrass core sdk client
-client = greengrasssdk.client('iot-data')
+#client = greengrasssdk.client('iot-data')
 # Retrieving platform information to send from Greengrass Core
 my_platform = platform.platform()
-# global temp resource
-temp = 0.0
+# global sensor
+deviceInfo = Sensors()
 
 # flask route
 app = Flask(__name__)
 api = Api(app)
 
-# MQTT will get this every 5s so REST API will share this resource
-def read_temperature():
-	global temp
-	f = open("/sys/class/thermal/thermal_zone0/temp", "r")
-	temp = f.read()
-	temp = float(temp) / 1000.0
-	return
-
 # GET for CPU temperatures
 class Temperature(Resource):
 	def get(self):
-		read_temperature()
+		global deviceInfo
+		temp = deviceInfo.getCPUTemperature()
 		ret = {'temperature': temp}
 		return jsonify(ret)
 
