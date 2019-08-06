@@ -23,8 +23,13 @@ class DeviceInfo:
 		# check how many cpus we have
 		cpuJson = self.__bashCommand("lscpu -J")
 		lscpu = json.loads(cpuJson)
-		cores = int(lscpu["lscpu"][7]["data"])
-		return cores
+		# get cpu cores and threads per core
+		for i in range(0, len(lscpu["lscpu"])):
+			if lscpu["lscpu"][i]["field"] == "CPU(s):":
+				cores = int(lscpu["lscpu"][i]["data"])
+			if lscpu["lscpu"][i]["field"] == "Thread(s) per core:":
+				threads = int(lscpu["lscpu"][i]["data"])
+		return int(cores / threads)
 
 	def getTemperature(self, index):
 		# check how many cpus we have
