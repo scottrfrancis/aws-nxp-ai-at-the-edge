@@ -3,7 +3,7 @@
 #
 
 # greengrass
-#import greengrasssdk
+import greengrasssdk
 import platform
 
 # flask
@@ -14,7 +14,7 @@ from flask import jsonify
 from deviceInfo import DeviceInfo
 
 # Creating a greengrass core sdk client
-#client = greengrasssdk.client('iot-data')
+client = greengrasssdk.client('iot-data')
 # Retrieving platform information to send from Greengrass Core
 my_platform = platform.platform()
 # global sensor
@@ -24,16 +24,12 @@ deviceInfo = DeviceInfo()
 app = Flask(__name__)
 api = Api(app)
 
-# GET for CPU temperatures
-class Temperature(Resource):
-	def get(self):
-		global deviceInfo
-		temp = deviceInfo.getTemperature()
-		ret = {'temperature': temp}
-		return jsonify(ret)
-
-
-api.add_resource(Temperature, '/temperature')  # Route_1
+# GET requests for CPU 
+@app.route('/cpu')
+def cpu_info():
+	ret = {'cores' : deviceInfo.getCPUCoresCount(), 'temperatures' : []}
+	ret['temperatures'] = { 'A53': deviceInfo.getTemperatureCPUA53(), 'A72': deviceInfo.getTemperatureCPUA72() }
+	return jsonify(ret)
 
 if __name__ == 'main':
 	print("Flask working")
