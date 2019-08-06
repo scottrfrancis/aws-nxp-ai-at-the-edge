@@ -19,16 +19,22 @@ class DeviceInfo:
 			raise Exception(error)
 		return output
 
-	def getTemperature(self):
+	def getCPUCoresCount(self):
 		# check how many cpus we have
 		cpuJson = self.__bashCommand("lscpu -J")
 		lscpu = json.loads(cpuJson)
 		cores = int(lscpu["lscpu"][7]["data"])
-		# we have to get the highest one
-		temps = []
-		for i in range(0, cores):
-			f = open("/sys/class/thermal/thermal_zone" + str(i) +  "/temp", "r")
-			temps.append(int(f.read()))
-		temp = max(temps)
+		return cores
+
+	def getTemperature(self, index):
+		# check how many cpus we have
+		cores = self.getCPUCoresCount()
+		# check out of the cores
+		if index >= cores:
+			raise Exception("We have " + str(cores) + " cores but temperature of core " + str(index) + " are requested")
+		# get from the index
+		f = open("/sys/class/thermal/thermal_zone" + str(index) +  "/temp", "r")
+		temp = int(f.read())
+		# kernel int to float
 		self.__temperature = float(temp) / 1000.0
 		return self.__temperature
