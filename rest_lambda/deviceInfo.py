@@ -25,6 +25,13 @@ class DeviceInfo:
 			raise Exception(error)
 		return output
 
+	def __getCelsiusFromThermalZone(self, index):
+		# get from thermal zone
+		f = open("/sys/class/thermal/thermal_zone" + str(index) + "/temp", "r")
+		temp = int(f.read())
+		# kernel int to float
+		return float(temp) / 1000.0
+
 	def getCPUCoresCount(self):
 		# check how many cpus we have
 		cpuJson = self.__bashCommand("lscpu -J")
@@ -39,16 +46,20 @@ class DeviceInfo:
 
 	def getTemperatureCPUA53(self):
 		# get from thermal zone
-		f = open("/sys/class/thermal/thermal_zone0/temp", "r")
-		temp = int(f.read())
-		# kernel int to float
-		self.__cpu_a53_temperature = float(temp) / 1000.0
+		self.__cpu_a53_temperature = self.__getCelsiusFromThermalZone(0)
 		return self.__cpu_a53_temperature
 
 	def getTemperatureCPUA72(self):
 		# get from thermal zone
-		f = open("/sys/class/thermal/thermal_zone1/temp", "r")
-		temp = int(f.read())
-		# kernel int to float
-		self.__cpu_a72_temperature = float(temp) / 1000.0
+		self.__cpu_a72_temperature = self.__getCelsiusFromThermalZone(1)
 		return self.__cpu_a72_temperature
+
+	def getTemperatureGPU0(self):
+		# get from thermal zone
+		self.__gpu0_temperature = self.__getCelsiusFromThermalZone(2)
+		return self.__gpu0_temperature
+
+	def getTemperatureGPU1(self):
+		# get from thermal zone
+		self.__gpu1_temperature = self.__getCelsiusFromThermalZone(3)
+		return self.__gpu1_temperature
