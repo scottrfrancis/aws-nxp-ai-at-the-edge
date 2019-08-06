@@ -5,12 +5,18 @@
 import subprocess
 import json
 
+#
+# I try to make this more generic but the thermal zones depends on device tree
+# descriptions, so this deviceInfo will be util only for the
+# NXP® i.MX 8QuadMax (i.MX 8QM), 2x Arm® Cortex-A72, 4x Cortex-A53, 2x Cortex-M4
+#
+
 class DeviceInfo:
 	def __init__(self):
-		self.__temperature = 0.0
-		self.__cpu = 0
-		self.__memory = 0
-		self.__gpu = 0
+		self.__cpu_a53_temperature = 0.0
+		self.__cpu_a72_temperature = 0.0
+		self.__gpu0_temperature = 0.0
+		self.__gpu1_temperature = 0.0
 
 	def __bashCommand(self, cmd):
 		process = subprocess.Popen(cmd.split(), stdout=subprocess.PIPE)
@@ -31,15 +37,18 @@ class DeviceInfo:
 				threads = int(lscpu["lscpu"][i]["data"])
 		return int(cores / threads)
 
-	def getTemperature(self, index):
-		# check how many cpus we have
-		cores = self.getCPUCoresCount()
-		# check out of the cores
-		if index >= cores:
-			raise Exception("We have " + str(cores) + " cores but temperature of core " + str(index) + " are requested")
-		# get from the index
-		f = open("/sys/class/thermal/thermal_zone" + str(index) +  "/temp", "r")
+	def getTemperatureCPUA53(self):
+		# get from thermal zone
+		f = open("/sys/class/thermal/thermal_zone0/temp", "r")
 		temp = int(f.read())
 		# kernel int to float
-		self.__temperature = float(temp) / 1000.0
-		return self.__temperature
+		self.__cpu_a53_temperature = float(temp) / 1000.0
+		return self.__cpu_a53_temperature
+
+	def getTemperatureCPUA72(self):
+		# get from thermal zone
+		f = open("/sys/class/thermal/thermal_zone1/temp", "r")
+		temp = int(f.read())
+		# kernel int to float
+		self.__cpu_a72_temperature = float(temp) / 1000.0
+		return self.__cpu_a72_temperature
