@@ -31,6 +31,13 @@ def cpu_info():
 	ret['temperatures'] = { 'A53': deviceInfo.getTemperatureCPUA53(), 'A72': deviceInfo.getTemperatureCPUA72() }
 	return jsonify(ret)
 
+# GET requests for GPU
+@app.route('/gpu')
+def gpu_info():
+	ret = {'cores' : 2, 'temperatures' : []}
+	ret['temperatures'] = { 'GPU0': deviceInfo.getTemperatureGPU0(), 'GPU1': deviceInfo.getTemperatureGPU1() }
+	return jsonify(ret)
+
 if __name__ == 'main':
 	print("Flask working")
 	app.run(host='0.0.0.0', port='5001')
