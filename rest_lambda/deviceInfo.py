@@ -3,6 +3,7 @@
 #
 
 import subprocess
+import psutil
 import json
 
 #
@@ -63,3 +64,9 @@ class DeviceInfo:
 		# get from thermal zone
 		self.__gpu1_temperature = self.__getCelsiusFromThermalZone(3)
 		return self.__gpu1_temperature
+
+	def getCPUUsage(self):
+		return psutil.cpu_percent()
+
+	def getRAMUsage(self):
+		return psutil.virtual_memory().percent
