@@ -27,8 +27,9 @@ api = Api(app)
 # GET requests for CPU 
 @app.route('/cpu')
 def cpu_info():
-	ret = {'cores' : deviceInfo.getCPUCoresCount(), 'temperatures' : []}
+	ret = {'cores' : deviceInfo.getCPUCoresCount(), 'temperatures' : [], 'usage': 0}
 	ret['temperatures'] = { 'A53': deviceInfo.getTemperatureCPUA53(), 'A72': deviceInfo.getTemperatureCPUA72() }
+	ret['usage'] = deviceInfo.getCPUUsage()
 	return jsonify(ret)
 
 # GET requests for GPU
