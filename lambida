@@ -1,0 +1,28 @@
+#!/bin/bash
+
+# zip the code
+cd rest_lambda
+rm function.zip
+zip function.zip *
+
+cd -
+
+# update the code
+aws lambda \
+	update-function-code \
+	--function-name RestGreenGrass_imx8 \
+	--zip-file fileb://$(pwd)/rest_lambda/function.zip \
+	--publish
+
+# delete the default alias
+aws lambda \
+	delete-alias \
+	--function-name RestGreenGrass_imx8 \
+	--name a1
+
+# create the alias for the $LATEST
+aws lambda \
+	create-alias \
+	--function-name RestGreenGrass_imx8 \
+	--name a1 \
+	--function-version 25
