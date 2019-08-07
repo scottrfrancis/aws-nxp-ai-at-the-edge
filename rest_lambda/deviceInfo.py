@@ -70,3 +70,9 @@ class DeviceInfo:
 
 	def getRAMUsage(self):
 		return psutil.virtual_memory().percent
+
+	def getRAMTotal(self):
+		return round(psutil.virtual_memory().total / 1024 / 1024 / 1024, 4)
+
+	def getRAMFree(self):
+		return round(psutil.virtual_memory().free / 1024 / 1024 / 1024, 4)
