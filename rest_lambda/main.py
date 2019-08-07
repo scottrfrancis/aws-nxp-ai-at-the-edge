@@ -39,6 +39,12 @@ def gpu_info():
 	ret['temperatures'] = { 'GPU0': deviceInfo.getTemperatureGPU0(), 'GPU1': deviceInfo.getTemperatureGPU1() }
 	return jsonify(ret)
 
+# GET requests for GPU
+@app.route('/ram')
+def ram_info():
+	ret = {'total' : deviceInfo.getRAMTotal(), 'usage' : deviceInfo.getRAMUsage(), 'free' : deviceInfo.getRAMFree()}
+	return jsonify(ret)
+
 if __name__ == 'main':
 	print("Flask working")
 	app.run(host='0.0.0.0', port='5001')
