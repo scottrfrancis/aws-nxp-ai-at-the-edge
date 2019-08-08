@@ -13,12 +13,38 @@ from json import dumps
 from flask import jsonify
 from deviceInfo import DeviceInfo
 
+# mqtt thread
+import threading
+import time
+import json
+
 # Creating a greengrass core sdk client
 client = greengrasssdk.client('iot-data')
 # Retrieving platform information to send from Greengrass Core
 my_platform = platform.platform()
 # global sensor
 deviceInfo = DeviceInfo()
+
+# "THREAD" for MQTT connections
+def greengrass_mqtt_run():
+	while True:
+		allData = {'cpu': {}, 'gpu': {}, 'ram': {}}
+		# mount cpu data
+		allData['cpu'] = {'cores' : deviceInfo.getCPUCoresCount(), 'temperatures' : [], 'usage': 0}
+		allData['cpu']['temperatures'] = { 'A53': deviceInfo.getTemperatureCPUA53(), 'A72': deviceInfo.getTemperatureCPUA72() }
+		allData['cpu']['usage'] = deviceInfo.getCPUUsage()
+		# mount gpu data
+		allData['gpu'] = {'cores' : 2, 'temperatures' : [], 'memoryUsage' : 0}
+		allData['gpu']['temperatures'] = { 'GPU0': deviceInfo.getTemperatureGPU0(), 'GPU1': deviceInfo.getTemperatureGPU1() }
+		# mount ram data
+		allData['ram'] = {'total' : deviceInfo.getRAMTotal(), 'usage' : deviceInfo.getRAMUsage(), 'free' : deviceInfo.getRAMFree()}
+		# send it as json
+		client.publish(topic='hello/world', payload=json.dumps(allData))
+		print("Mqtt published ...")
+		time.sleep(5)
+
+t = threading.Thread(target=greengrass_mqtt_run)
+t.start()
 
 # flask route
 app = Flask(__name__)
