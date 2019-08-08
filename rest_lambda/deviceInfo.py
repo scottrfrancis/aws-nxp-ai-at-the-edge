@@ -1,3 +1,5 @@
+"""Apalis iMX8 Device Info class"""
+
 #
 # Copyright 2019 Toradex AG. or its affiliates. All Rights Reserved.
 #
@@ -5,6 +7,11 @@
 import subprocess
 import psutil
 import json
+
+__author__ = 'Matheus Castello'
+__version__ = '0.0'
+__license__ = ''
+__copyright__ = 'Copyright 2019 Toradex AG'
 
 #
 # I try to make this more generic but the thermal zones depends on device tree
@@ -78,10 +85,11 @@ class DeviceInfo:
 		return round(psutil.virtual_memory().free / 1024 / 1024 / 1024, 4)
 
 	def getGPUMemoryUsage(self):
-		stuff = self.__bashCommand("cat /sys/kernel/debug/gc/meminfo | grep Used");
-		slices = stuff.split()
-		used = int(slices[2])
-		stuff = self.__bashCommand("cat /sys/kernel/debug/gc/meminfo | grep Free");
-		slices = stuff.split()
-		free = int(slices[2])
-		return (used * 100) / free
+		#stuff = self.__bashCommand("cat /sys/kernel/debug/gc/meminfo | grep Used");
+		#slices = stuff.split()
+		#used = int(slices[2])
+		#stuff = self.__bashCommand("cat /sys/kernel/debug/gc/meminfo | grep Free");
+		#slices = stuff.split()
+		#free = int(slices[2])
+		#return (used * 100) / free
+		return 0
