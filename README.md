@@ -134,3 +134,10 @@ sudo su
 cd /greengrass/ggc/var/log/system
 cat runtime.log
 ```
+
+- Check Lambda logs
+
+```
+cd /greengrass/ggc/var/log/user/us-west-2/227195268013
+cat RestGreenGrass_imx8.log
+```
