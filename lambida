@@ -20,9 +20,9 @@ aws lambda \
 	--function-name RestGreenGrass_imx8 \
 	--name a1
 
-# create the alias for the $LATEST
+# create the alias for the $LATEST TODO get the $LATEST number automatically
 aws lambda \
 	create-alias \
 	--function-name RestGreenGrass_imx8 \
 	--name a1 \
-	--function-version 25
+	--function-version $1
