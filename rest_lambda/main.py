@@ -35,7 +35,7 @@ def cpu_info():
 # GET requests for GPU
 @app.route('/gpu')
 def gpu_info():
-	ret = {'cores' : 2, 'temperatures' : []}
+	ret = {'cores' : 2, 'temperatures' : [], 'memoryUsage' : deviceInfo.getGPUMemoryUsage()}
 	ret['temperatures'] = { 'GPU0': deviceInfo.getTemperatureGPU0(), 'GPU1': deviceInfo.getTemperatureGPU1() }
 	return jsonify(ret)
 
