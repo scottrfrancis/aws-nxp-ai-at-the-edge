@@ -76,3 +76,12 @@ class DeviceInfo:
 
 	def getRAMFree(self):
 		return round(psutil.virtual_memory().free / 1024 / 1024 / 1024, 4)
+
+	def getGPUMemoryUsage(self):
+		stuff = self.__bashCommand("cat /sys/kernel/debug/gc/meminfo | grep Used");
+		slices = stuff.split()
+		used = int(slices[2])
+		stuff = self.__bashCommand("cat /sys/kernel/debug/gc/meminfo | grep Free");
+		slices = stuff.split()
+		free = int(slices[2])
+		return (used * 100) / free
