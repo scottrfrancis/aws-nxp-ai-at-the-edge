@@ -8,14 +8,17 @@
     <q-card class="my-card text-white">
       <q-item>
         <q-item-section avatar>
-          <q-avatar>
+          <q-avatar size="48px">
             <img src="~assets/thermometer.svg">
           </q-avatar>
         </q-item-section>
 
         <q-item-section>
           <q-item-label>A72 Temperature</q-item-label>
-          <q-item-label caption>iMX8 ARM Dual Core</q-item-label>
+          <q-item-label
+            style="color: white;"
+            caption
+          >iMX8 ARM Dual Core</q-item-label>
         </q-item-section>
       </q-item>
 
@@ -38,14 +41,19 @@
     <q-card class="my-card text-white">
       <q-item>
         <q-item-section avatar>
-          <q-avatar>
+          <q-avatar size="48px">
             <img src="~assets/thermometer.svg">
           </q-avatar>
         </q-item-section>
 
         <q-item-section>
           <q-item-label>A53 Temperature</q-item-label>
-          <q-item-label caption>iMX8 ARM Quad Core</q-item-label>
+          <q-item-label
+            style="color: white;"
+            caption
+          >
+            iMX8 ARM Quad Core
+          </q-item-label>
         </q-item-section>
       </q-item>
 
@@ -69,7 +77,7 @@
 
 <style lang="stylus" scoped>
 .my-card {
-  background: radial-gradient(circle, #868686 0%, #545454 100%);
+  background: radial-gradient(circle, #444444 0%, #232323 100%);
 }
 </style>
 
