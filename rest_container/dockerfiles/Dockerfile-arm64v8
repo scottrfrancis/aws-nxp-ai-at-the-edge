@@ -1,4 +1,4 @@
-FROM arm64v8/python:3-slim-buster
+FROM arm32v7/python:3-slim-buster
 
 # install deps for gcc on pip
 RUN apt-get -y update && apt-get install -y --no-install-recommends \
