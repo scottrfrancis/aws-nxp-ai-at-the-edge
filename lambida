@@ -19,7 +19,7 @@ echo "Updating the code..."
 aws lambda \
 	update-function-code \
 	--function-name ${LAMBDA_NAME} \
-	--zip-file fileb://$(pwd)/rest_lambda/${LAMBDA_ALIAS}.zip \
+	--zip-file fileb://$(pwd)/${LAMBDA_DIRECTORY}/${LAMBDA_ALIAS}.zip \
 	--publish
 
 # delete the default alias
