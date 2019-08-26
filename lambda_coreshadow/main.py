@@ -17,8 +17,8 @@ from utils import Utils
 from cloudWatch import CloudWatch
 from coreShadow import CoreShadow
 
-
-shadowTopic = "$aws/things/colibri_imx6_leo_Core/shadow/update"
+shadowThing = "colibri_imx6_leo_Core"
+shadowTopic = "$aws/things/" + shadowThing + "/shadow/update"
 
 # Creating a greengrass core sdk client
 client = greengrasssdk.client('iot-data')
@@ -47,15 +47,16 @@ def greengrass_mqtt_run():
 		client.publish(topic='ram/data', payload=ramData)
 		print("Mqtt ram/data published ...")
 		
-		# Publish to CloudWatch
-		# cpu load
-		#cpuLoad = cw.form_payload_cpu_load(cpuData["usage"])
-		#client.publish(topic='cloudwatch/metric/put', payload=cpuLoad)
-		# gpu load
-		#gpuLoad = cw.form_payload_gpu_load(50)
-		#client.publish(topic='cloudwatch/metric/put', payload=gpuLoad)
+		shadowPayload = shadow.gen_payload(cpuData, gpuData, ramData)
+		print("Shadow payload: " + shadowPayload)
+
+		# It has a special function already :)
+		res = client.update_thing_shadow(
+			thingName = shadowThing,
+			payload = shadowPayload
+		)
 		
-		shadow.gen_payload({"color": "blue", "power": "off"})
+		print("Mqtt shadowTopic published: " + str(res))
 
 		time.sleep(5)
 
