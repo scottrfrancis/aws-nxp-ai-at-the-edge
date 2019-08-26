@@ -1,17 +1,13 @@
 #!/bin/bash
 
-#LAMBDA_NAME=CloudWatch_MQTT
-#LAMBDA_ALIAS=cwmqtt
-#LAMBDA_DIRECTORY=lambda_cloudwatch
-LAMBDA_NAME=RestGreenGrass_imx8
-LAMBDA_ALIAS=timetosleep
-LAMBDA_DIRECTORY=rest_lambda
+LAMBDA_NAME=DynamoDB
+LAMBDA_ALIAS=ddb
+LAMBDA_DIRECTORY=lambda_dynamodb
 
 # zip the code
 cd ${LAMBDA_DIRECTORY}
 rm ${LAMBDA_ALIAS}.zip
-zip ${LAMBDA_ALIAS}.zip *
-
+zip -rq ${LAMBDA_ALIAS}.zip *
 cd -
 
 # update the code
