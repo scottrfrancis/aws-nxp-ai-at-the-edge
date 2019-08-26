@@ -1,0 +1,16 @@
+# Python packages that are described in requirements.txt
+
+bin/
+certifi-2019.6.16.dist-info/
+certifi/
+chardet-3.0.4.dist-info/
+chardet/
+cshadow.zip
+greengrasssdk/
+idna-2.8.dist-info/
+idna/
+requests-2.22.0.dist-info/
+requests/
+urllib3-1.25.3.dist-info/
+urllib3/
+utils.py
