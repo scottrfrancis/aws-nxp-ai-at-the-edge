@@ -26,17 +26,34 @@ util = Utils()
 def greengrass_mqtt_run():
 	while True:
 		# cpu/data
-		cpuData = requests.get("http://localhost:5001/cpu")
-		client.publish(topic='cpu/data', payload=cpuData)
-		print("Mqtt cpu/data published ...")
+		try:
+			cpuData = requests.get("http://localhost:5001/cpu")
+			client.publish(topic='cpu/data', payload=cpuData)
+			print("Mqtt cpu/data published ...")
+		except requests.exceptions.ConnectionError:
+			print("Connection error, retry on next loop!")
+		except Exception as e:
+			print("Unknown exception: " + repr(e))
 		# gpu/data
-		gpuData = requests.get("http://localhost:5001/gpu")
-		client.publish(topic='gpu/data', payload=gpuData)
-		print("Mqtt gpu/data published ...")
+		try:
+			gpuData = requests.get("http://localhost:5001/gpu")
+			client.publish(topic='gpu/data', payload=gpuData)
+			print("Mqtt gpu/data published ...")
+		except requests.exceptions.ConnectionError:
+			print("Connection error, retry on next loop!")
+		except Exception as e:
+			print("Unknown exception: " + repr(e))
 		# ram/data
-		ramData = requests.get("http://localhost:5001/ram")
-		client.publish(topic='ram/data', payload=ramData)
-		print("Mqtt ram/data published ...")
+		try:
+			ramData = requests.get("http://localhost:5001/ram")
+			client.publish(topic='ram/data', payload=ramData)
+			print("Mqtt ram/data published ...")
+		except requests.exceptions.ConnectionError:
+			print("Connection error, retry on next loop!")
+		except Exception as e:
+			print("Unknown exception: " + repr(e))
+
+		# Send data periodically
 		time.sleep(5)
 
 t = threading.Thread(target=greengrass_mqtt_run)
