@@ -1,7 +1,7 @@
 #!/bin/bash
 
-LAMBDA_NAME=RestGreenGrass_imx8
-LAMBDA_ALIAS=timetosleep
+LAMBDA_NAME=SystemStatus
+LAMBDA_ALIAS=sysstats
 LAMBDA_DIRECTORY=lambda_system_status
 
 # zip the code
