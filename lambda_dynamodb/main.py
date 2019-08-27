@@ -25,11 +25,11 @@ try:
         TableName=tableName,
         KeySchema=[
             {
-                'AttributeName': 'timestamp', 
+                'AttributeName': 'timestamp',
                 'KeyType': 'HASH'  #Partition key
             },
 			{
-                'AttributeName': 'subsystem', 
+                'AttributeName': 'system',
                 'KeyType': 'RANGE'  #Sort key
             }
         ],
@@ -39,7 +39,7 @@ try:
                 'AttributeType': 'N'
             },
 			{
-                'AttributeName': 'subsystem',
+                'AttributeName': 'system',
                 'AttributeType': 'S'
             }
         ],
@@ -86,83 +86,36 @@ def function_handler(event, context):
 	global tableName
 	table = dynamodb.Table(tableName)
 
-	# A53 CPU temeperature
+	# CPU
+
 	table.put_item(
 		Item={
+			'timestamp': event["current"]["metadata"]["reported"]["cpu"]["temperatures"]["A53"]["timestamp"],
 			'system': 'cpu',
-			'subsystem': 'cpu-temperature-a53',
-			'value' : Decimal(str(event["current"]["state"]["reported"]["cpu"]["temperatures"]["A53"])),
-			'timestamp': event["current"]["metadata"]["reported"]["cpu"]["temperatures"]["A53"]["timestamp"]
+			'a53-temperature': Decimal(str(event["current"]["state"]["reported"]["cpu"]["temperatures"]["A53"])),
+			'a72-temperature': Decimal(str(event["current"]["state"]["reported"]["cpu"]["temperatures"]["A72"])),
+			'processing-load': Decimal(str(event["current"]["state"]["reported"]["cpu"]["usage"]))
 		}
 	)
 
-	# A72 CPU temeperature
+	# GPU
 	table.put_item(
 		Item={
-			'system': 'cpu',
-			'subsystem': 'cpu-temperature-a72',
-			'value' : Decimal(str(event["current"]["state"]["reported"]["cpu"]["temperatures"]["A72"])),
-			'timestamp': event["current"]["metadata"]["reported"]["cpu"]["temperatures"]["A72"]["timestamp"]
-		}
-	)
-
-	# CPU load
-	table.put_item(
-		Item={
-			'system': 'cpu',
-			'subsystem': 'cpu-processing-load',
-			'value' : Decimal(str(event["current"]["state"]["reported"]["cpu"]["usage"])),
-			'timestamp': event["current"]["metadata"]["reported"]["cpu"]["usage"]["timestamp"]
-		}
-	)
-
-	# GPU0 temeperature
-	table.put_item(
-		Item={
+			'timestamp': event["current"]["metadata"]["reported"]["gpu"]["temperatures"]["GPU0"]["timestamp"],
 			'system': 'gpu',
-			'subsystem': 'gpu-temperature-GPU0',
-			'value' : Decimal(str(event["current"]["state"]["reported"]["gpu"]["temperatures"]["GPU0"])),
-			'timestamp': event["current"]["metadata"]["reported"]["gpu"]["temperatures"]["GPU0"]["timestamp"]
+			'gpu0-temperature' : Decimal(str(event["current"]["state"]["reported"]["gpu"]["temperatures"]["GPU0"])),
+			'gpu1-temperature' : Decimal(str(event["current"]["state"]["reported"]["gpu"]["temperatures"]["GPU1"])),
+			'memory-load' : Decimal(str(event["current"]["state"]["reported"]["gpu"]["memoryUsage"]))
 		}
 	)
 
-	# GPU1 temperature
+	# RAM
 	table.put_item(
 	Item={
-			'system': 'gpu',
-			'subsystem': 'gpu-temperature-GPU1',
-			'value' : Decimal(str(event["current"]["state"]["reported"]["gpu"]["temperatures"]["GPU1"])),
-			'timestamp': event["current"]["metadata"]["reported"]["gpu"]["temperatures"]["GPU1"]["timestamp"]
-		}
-	)
-
-	# GPU memory usage
-	table.put_item(
-	Item={
-			'system': 'gpu',
-			'subsystem': 'gpu-memory-load',
-			'value' : Decimal(str(event["current"]["state"]["reported"]["gpu"]["memoryUsage"])),
-			'timestamp': event["current"]["metadata"]["reported"]["gpu"]["memoryUsage"]["timestamp"]
-		}
-	)
-
-	# RAM free
-	table.put_item(
-	Item={
+			'timestamp': event["current"]["metadata"]["reported"]["ram"]["free"]["timestamp"],
 			'system': 'ram',
-			'subsystem': 'ram-memory-free',
-			'value' : Decimal(str(event["current"]["state"]["reported"]["ram"]["free"])),
-			'timestamp': event["current"]["metadata"]["reported"]["ram"]["free"]["timestamp"]
-		}
-	)
-
-	# RAM usage
-	table.put_item(
-	Item={
-			'system': 'ram',
-			'subsystem': 'ram-memory-load',
-			'value' : Decimal(str(event["current"]["state"]["reported"]["ram"]["usage"])),
-			'timestamp': event["current"]["metadata"]["reported"]["ram"]["usage"]["timestamp"]
+			'memory-free' : Decimal(str(event["current"]["state"]["reported"]["ram"]["free"])),
+			'memory-load' : Decimal(str(event["current"]["state"]["reported"]["ram"]["usage"]))
 		}
 	)
 
