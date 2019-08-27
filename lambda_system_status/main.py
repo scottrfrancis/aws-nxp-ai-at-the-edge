@@ -13,14 +13,11 @@ import requests
 import threading
 import time
 import json
-from utils import Utils
 
 # Creating a greengrass core sdk client
 client = greengrasssdk.client('iot-data')
 # Retrieving platform information to send from Greengrass Core
 my_platform = platform.platform()
-# utils methods
-util = Utils()
 
 # "THREAD" for MQTT connections
 def greengrass_mqtt_run():
