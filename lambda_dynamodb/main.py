@@ -88,7 +88,7 @@ def function_handler(event, context):
 
 	# CPU
 
-	table.put_item(
+	res = table.put_item(
 		Item={
 			'timestamp': event["current"]["metadata"]["reported"]["cpu"]["temperatures"]["A53"]["timestamp"],
 			'system': 'cpu',
@@ -97,9 +97,10 @@ def function_handler(event, context):
 			'processing-load': Decimal(str(event["current"]["state"]["reported"]["cpu"]["usage"]))
 		}
 	)
+	print("Added CPU item: " + str(res))
 
 	# GPU
-	table.put_item(
+	res = table.put_item(
 		Item={
 			'timestamp': event["current"]["metadata"]["reported"]["gpu"]["temperatures"]["GPU0"]["timestamp"],
 			'system': 'gpu',
@@ -108,9 +109,10 @@ def function_handler(event, context):
 			'memory-load' : Decimal(str(event["current"]["state"]["reported"]["gpu"]["memoryUsage"]))
 		}
 	)
+	print("Added GPU item: " + str(res))
 
 	# RAM
-	table.put_item(
+	res = table.put_item(
 	Item={
 			'timestamp': event["current"]["metadata"]["reported"]["ram"]["free"]["timestamp"],
 			'system': 'ram',
@@ -118,5 +120,6 @@ def function_handler(event, context):
 			'memory-load' : Decimal(str(event["current"]["state"]["reported"]["ram"]["usage"]))
 		}
 	)
+	print("Added RAM item: " + str(res))
 
 	return
