@@ -4,7 +4,6 @@
 
 # greengrass
 import greengrasssdk
-import platform
 
 # rest consume
 import requests
@@ -12,23 +11,20 @@ import requests
 # mqtt thread
 import threading
 import time
-import json
 
 system_data_port = "5001"
-conveyor_belt_port = "5002"
+system_control_port = "5002"
 rest = {
 	"cpu/data": "http://localhost:" + system_data_port + "/cpu",
 	"gpu/data": "http://localhost:" + system_data_port + "/gpu",
 	"ram/data": "http://localhost:" + system_data_port + "/ram",
 	"cam/data": "http://localhost:" + system_data_port + "/cam",
-	"cb/data": "http://localhost:" + conveyor_belt_port + "/cb",
-	"led/data": "http://localhost:" + conveyor_belt_port + "/led"
+	"cb/data": "http://localhost:" + system_control_port + "/cb",
+	"led/data": "http://localhost:" + system_control_port + "/led"
 }
 
 # Creating a greengrass core sdk client
 client = greengrasssdk.client('iot-data')
-# Retrieving platform information to send from Greengrass Core
-my_platform = platform.platform()
 
 # "THREAD" for MQTT connections
 def greengrass_mqtt_run():
