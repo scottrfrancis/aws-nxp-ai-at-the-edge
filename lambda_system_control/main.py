@@ -4,7 +4,6 @@
 
 # greengrass
 import greengrasssdk
-import platform
 
 # rest consume
 import requests
@@ -14,43 +13,36 @@ import threading
 import time
 import json
 
-system_data_port = "5001"
-conveyor_belt_port = "5002"
+core_name = "colibri_imx6_leo_Core"
+system_control_port = "5002"
 rest = {
-	"cpu/data": "http://localhost:" + system_data_port + "/cpu",
-	"gpu/data": "http://localhost:" + system_data_port + "/gpu",
-	"ram/data": "http://localhost:" + system_data_port + "/ram",
-	"cam/data": "http://localhost:" + system_data_port + "/cam",
-	"cb/data": "http://localhost:" + conveyor_belt_port + "/cb",
-	"led/data": "http://localhost:" + conveyor_belt_port + "/led"
+	"cam/resolution": {
+		"url": "http://localhost:" + system_control_port + "/cam/resolution/",
+		"value": 0
+	},
+	"cb/speed": {
+		"url": "http://localhost:" + system_control_port + "/cb/speed/",
+		"value": 0
+	},
+	"led/brightness": {
+		"url": "http://localhost:" + system_control_port + "/led/brightness/",
+		"value": 0
+	}
 }
 
 # Creating a greengrass core sdk client
 client = greengrasssdk.client('iot-data')
-# Retrieving platform information to send from Greengrass Core
-my_platform = platform.platform()
 
-# "THREAD" for MQTT connections
-def greengrass_mqtt_run():
-	while True:
-		for topicMQTT,url in rest.items():
-			# Basically bridge REST to MQTT
-			try:
-				getData = requests.get(url)
-				client.publish(topic=topicMQTT, payload=getData)
-				print("MQTT data published on " + topicMQTT)
-			except requests.exceptions.ConnectionError:
-				print("Connection error on topic " + topicMQTT + ", retry on next loop!")
-			except Exception as e:
-				print("Unknown exception on topic " + topicMQTT + ": " + repr(e))
-
-		# Send data periodically
-		time.sleep(5)
-
-t = threading.Thread(target=greengrass_mqtt_run)
-t.start()
-
-# This is a dummy handler and will not be invoked
-# Instead the code above will be executed in an infinite loop for our example
+# Update values on device shadow changes!
 def function_handler(event, context):
+	if context.client_context.custom['subject'] == "$aws/things/" + core_name + "/shadow/update/delta":
+		for key,item in rest.items():
+			try:
+				item["value"] = event["current"]["state"]["desired"][key.split("/")[0]][key.split("/")[1]]
+				res = requests.put(item["url"], data={'value': item["value"]})
+			except requests.exceptions.ConnectionError:
+				print("Connection error on REST endpoint " + item["url"] + ", retry on next loop!")
+			except Exception as e:
+				print("Unknown exception on REST endpoint " + item["url"] + ": " + repr(e))
+				print("Response error: " + str(res))
 	return
