@@ -1,0 +1,18 @@
+FROM arm32v7/python:3-slim-buster
+
+COPY ./requirements.txt .
+# install deps for gcc on pip
+RUN apt-get -y update && apt-get install -y --no-install-recommends \
+	gcc \
+	python3-dev \
+	&& pip3 install -r requirements.txt \
+	&& apt-get remove gcc python3-dev -y \
+	&& apt-get purge -y --auto-remove \
+	&& apt-get clean && apt-get autoremove && rm -rf /var/lib/apt/lists/*
+
+COPY . /project
+WORKDIR /project
+
+EXPOSE 5002
+
+ENTRYPOINT [ "python", "main.py" ]
