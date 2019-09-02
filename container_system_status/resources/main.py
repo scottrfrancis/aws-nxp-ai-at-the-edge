@@ -49,6 +49,12 @@ def ram_info():
            'free': deviceInfo.getRAMFree()}
     return jsonify(ret)
 
+# GET requests for GPU
+@app.route('/info')
+@cross_origin()
+def info():
+    ret = {'ram': ram_info(), 'gpu': gpu_info(), 'cpu': cpu_info()}
+    return jsonify(ret)
 
 if __name__ == '__main__':
     print("Flask working well")
