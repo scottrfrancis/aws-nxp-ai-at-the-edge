@@ -1,4 +1,4 @@
-!#/bin/bash
+#!/bin/bash
 
 DOCKER_COMPOSE_DIR=./docker_compose
 ARCH=$(uname --m)
