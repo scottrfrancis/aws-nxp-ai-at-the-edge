@@ -1,0 +1,14 @@
+bin
+certifi
+certifi-2019.6.16.dist-info
+chardet
+chardet-3.0.4.dist-info
+greengrasssdk
+greengrasssdk-1.4.0.dist-info
+idna
+idna-2.8.dist-info
+requests
+requests-2.22.0.dist-info
+urllib3
+urllib3-1.25.3.dist-info
+sysctrl.zip
