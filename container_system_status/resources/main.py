@@ -53,7 +53,22 @@ def ram_info():
 @app.route('/info')
 @cross_origin()
 def info():
-    ret = {'ram': ram_info(), 'gpu': gpu_info(), 'cpu': cpu_info()}
+    retRam = {'total': deviceInfo.getRAMTotal(), 'usage': deviceInfo.getRAMUsage(),
+           'free': deviceInfo.getRAMFree()}
+    
+    retGpu = {'cores': 2, 'temperatures': [],
+           'memoryUsage': deviceInfo.getGPUMemoryUsage()}
+    retGpu['temperatures'] = {'GPU0': deviceInfo.getTemperatureGPU0(
+    ), 'GPU1': deviceInfo.getTemperatureGPU1()}
+    #retGpu = {}
+
+    retCpu = {'cores': deviceInfo.getCPUCoresCount(), 'temperatures': [],
+           'usage': 0}
+    retCpu['temperatures'] = {'A53': deviceInfo.getTemperatureCPUA53(
+    ), 'A72': deviceInfo.getTemperatureCPUA72()}
+    retCpu['usage'] = deviceInfo.getCPUUsage()
+    
+    ret = {'ram': retRam, 'gpu': retGpu, 'cpu': retCpu}
     return jsonify(ret)
 
 if __name__ == '__main__':
