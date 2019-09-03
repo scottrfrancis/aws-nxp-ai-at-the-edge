@@ -152,4 +152,67 @@ def function_handler(event, context):
 	)
 	print("Added RAM item: " + str(res))
 
+	# Inference
+
+	inferencedatetime = datetime.utcfromtimestamp(int(event["current"]["metadata"]["reported"]["ram"]["free"]["timestamp"])).strftime('%Y-%m-%d %H:%M:%S')
+	res = table.put_item(
+	Item={
+			'pk' : inferencedatetime.split()[0],
+			'sk' : inferencedatetime.split()[1] + '-inference',
+			#'data' : {
+			#	'inference' : {
+			#		'pasta-type' : Decimal(str(event["current"]["state"]["reported"]["inference"]["pasta-type"])),
+			#		'confidence' : Decimal(str(event["current"]["state"]["reported"]["inference"]["confidence"])),
+			#		'inference-time' : Decimal(str(event["current"]["state"]["reported"]["inference"]["inference-time"]))
+			#	}
+			#},
+			'system': 'inference',
+			'pasta-type' : Decimal(randrange(0, 4)),
+			'confidence' : Decimal(str(uniform(0.0, 100.0))),
+			'inference-time' : Decimal(randrange(75, 483))
+			#'pasta-type' : Decimal(str(event["current"]["state"]["reported"]["inference"]["pasta-type"])),
+			#'confidence' : Decimal(str(event["current"]["state"]["reported"]["inference"]["confidence"])),
+			#'inference-time' : Decimal(str(event["current"]["state"]["reported"]["inference"]["inference-time"]))
+		}
+	)
+	print("Added inference item: " + str(res))
+
+	# Conveyor Belt
+
+	cbdatetime = datetime.utcfromtimestamp(int(event["current"]["metadata"]["reported"]["ram"]["free"]["timestamp"])).strftime('%Y-%m-%d %H:%M:%S')
+	res = table.put_item(
+	Item={
+			'pk' : cbdatetime.split()[0],
+			'sk' : cbdatetime.split()[1] + '-cb',
+			#'data' : {
+			#	'cb' : {
+			#		'speed' : Decimal(str(event["current"]["state"]["reported"]["cb"]["speed"]))
+			#	}
+			#},
+			'system': 'cb',
+			'speed' : Decimal(randrange(46, 63, 3))
+			#'speed' : Decimal(str(event["current"]["state"]["reported"]["cb"]["speed"]))
+		}
+	)
+	print("Added conveyor belt item: " + str(res))
+
+	# LED
+
+	leddatetime = datetime.utcfromtimestamp(int(event["current"]["metadata"]["reported"]["ram"]["free"]["timestamp"])).strftime('%Y-%m-%d %H:%M:%S')
+	res = table.put_item(
+	Item={
+			'pk' : leddatetime.split()[0],
+			'sk' : leddatetime.split()[1] + '-led',
+			#'data' : {
+			#	'led' : {
+			#		'brightness' : Decimal(str(event["current"]["state"]["reported"]["led"]["brightness"]))
+			#	}
+			#},
+			'system': 'led',
+			'brightness' : Decimal(randrange(87, 93, 1))
+			#'brightness' : Decimal(str(event["current"]["state"]["reported"]["led"]["brightness"]))
+		}
+	)
+	print("Added LED item: " + str(res))
+
 	return
