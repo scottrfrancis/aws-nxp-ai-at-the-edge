@@ -18,7 +18,8 @@ from decimal import Decimal
 shadowTopic = "$aws/things/colibri_imx6_leo_Core/shadow/update"
 
 dynamodb = boto3.resource('dynamodb', region_name='us-west-2')
-tableName = "PastaDemo"
+#tableName = "PastaDemo"
+tableName = "sebaPastaNewRepoDev-sebaPastaNewRepoDevApiDynamoDbTable-5KJC1F84OO7F"
 
 # Create the dynamo db table if needed
 try:
