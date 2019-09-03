@@ -11,6 +11,7 @@ import logging
 # helper
 from random import *
 import time
+from datetime import datetime
 import json
 from decimal import Decimal
 
@@ -25,21 +26,21 @@ try:
         TableName=tableName,
         KeySchema=[
             {
-                'AttributeName': 'timestamp',
+                'AttributeName': 'pk',
                 'KeyType': 'HASH'  #Partition key
             },
 			{
-                'AttributeName': 'system',
+                'AttributeName': 'sk',
                 'KeyType': 'RANGE'  #Sort key
             }
         ],
         AttributeDefinitions=[
             {
-                'AttributeName': 'timestamp',
-                'AttributeType': 'N'
+                'AttributeName': 'pk',
+                'AttributeType': 'S'
             },
 			{
-                'AttributeName': 'system',
+                'AttributeName': 'sk',
                 'AttributeType': 'S'
             }
         ],
@@ -88,9 +89,11 @@ def function_handler(event, context):
 
 	# CPU
 
+	cpudatetime = datetime.utcfromtimestamp(int(event["current"]["metadata"]["reported"]["cpu"]["temperatures"]["A53"]["timestamp"])).strftime('%Y-%m-%d %H:%M:%S')
 	res = table.put_item(
 		Item={
-			'timestamp': event["current"]["metadata"]["reported"]["cpu"]["temperatures"]["A53"]["timestamp"],
+			'pk' : cpudatetime.split()[0],
+			'sk' : cpudatetime.split()[1] + '-cpu',
 			'system': 'cpu',
 			'a53-temperature': Decimal(str(event["current"]["state"]["reported"]["cpu"]["temperatures"]["A53"])),
 			'a72-temperature': Decimal(str(event["current"]["state"]["reported"]["cpu"]["temperatures"]["A72"])),
@@ -100,9 +103,12 @@ def function_handler(event, context):
 	print("Added CPU item: " + str(res))
 
 	# GPU
+
+	gpudatetime = datetime.utcfromtimestamp(int(event["current"]["metadata"]["reported"]["gpu"]["temperatures"]["GPU0"]["timestamp"])).strftime('%Y-%m-%d %H:%M:%S')
 	res = table.put_item(
 		Item={
-			'timestamp': event["current"]["metadata"]["reported"]["gpu"]["temperatures"]["GPU0"]["timestamp"],
+			'pk' : gpudatetime.split()[0],
+			'sk' : gpudatetime.split()[1] + '-gpu',
 			'system': 'gpu',
 			'gpu0-temperature' : Decimal(str(event["current"]["state"]["reported"]["gpu"]["temperatures"]["GPU0"])),
 			'gpu1-temperature' : Decimal(str(event["current"]["state"]["reported"]["gpu"]["temperatures"]["GPU1"])),
@@ -112,9 +118,12 @@ def function_handler(event, context):
 	print("Added GPU item: " + str(res))
 
 	# RAM
+
+	ramdatetime = datetime.utcfromtimestamp(int(event["current"]["metadata"]["reported"]["ram"]["free"]["timestamp"])).strftime('%Y-%m-%d %H:%M:%S')
 	res = table.put_item(
 	Item={
-			'timestamp': event["current"]["metadata"]["reported"]["ram"]["free"]["timestamp"],
+			'pk' : ramdatetime.split()[0],
+			'sk' : ramdatetime.split()[1] + '-ram',
 			'system': 'ram',
 			'memory-free' : Decimal(str(event["current"]["state"]["reported"]["ram"]["free"])),
 			'memory-load' : Decimal(str(event["current"]["state"]["reported"]["ram"]["usage"]))
