@@ -39,10 +39,14 @@ def function_handler(event, context):
 		for key,item in rest.items():
 			try:
 				item["value"] = event["current"]["state"]["desired"][key.split("/")[0]][key.split("/")[1]]
-				res = requests.put(item["url"], data={'value': item["value"]})
+				res = requests.get(item["url"] + item["value"])
 			except requests.exceptions.ConnectionError:
 				print("Connection error on REST endpoint " + item["url"] + ", retry on next loop!")
 			except Exception as e:
 				print("Unknown exception on REST endpoint " + item["url"] + ": " + repr(e))
 				print("Response error: " + str(res))
+	elif context.client_context.custom['subject'] == "cb/speed":
+		requests.get(rest["cb/speed"]["url"] + str(event["speed"]))
+	elif context.client_context.custom['subject'] == "led/brightness":
+		requests.get(rest["led/brightness"]["url"] + str(event["brightness"]))
 	return
