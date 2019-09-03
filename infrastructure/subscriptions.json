@@ -1,0 +1,118 @@
+{
+    "Subscriptions": [
+        {
+            "Id": "SystemStatusToIoTCloudCPU",
+            "Source": "arn:aws:lambda:us-west-2:227195268013:function:SystemStatus",
+            "Subject": "cpu/data",
+            "Target": "arn:aws:iot:us-west-2:227195268013:iot:Publish"
+        },
+        {
+            "Id": "SystemStatusToIoTCloudGPU",
+            "Source": "arn:aws:lambda:us-west-2:227195268013:function:SystemStatus",
+            "Subject": "gpu/data",
+            "Target": "arn:aws:iot:us-west-2:227195268013:iot:Publish"
+        },
+        {
+            "Id": "SystemStatusToIoTCloudRAM",
+            "Source": "arn:aws:lambda:us-west-2:227195268013:function:SystemStatus",
+            "Subject": "ram/data",
+            "Target": "arn:aws:iot:us-west-2:227195268013:iot:Publish"
+        },
+        {
+            "Id": "SystemStatusToIoTCloudCB",
+            "Source": "arn:aws:lambda:us-west-2:227195268013:function:SystemStatus",
+            "Subject": "cb/data",
+            "Target": "arn:aws:iot:us-west-2:227195268013:iot:Publish"
+        },
+        {
+            "Id": "SystemStatusToIoTCloudLED",
+            "Source": "arn:aws:lambda:us-west-2:227195268013:function:SystemStatus",
+            "Subject": "led/data",
+            "Target": "arn:aws:iot:us-west-2:227195268013:iot:Publish"
+        },
+        {
+            "Id": "SystemStatusToIoTCloudCAM",
+            "Source": "arn:aws:lambda:us-west-2:227195268013:function:SystemStatus",
+            "Subject": "cam/data",
+            "Target": "arn:aws:iot:us-west-2:227195268013:iot:Publish"
+        },
+        {
+            "Id": "SystemStatusToCoreShadowCPU",
+            "Source": "arn:aws:lambda:us-west-2:227195268013:function:SystemStatus",
+            "Subject": "cpu/data",
+            "Target": "arn:aws:lambda:us-west-2:227195268013:function:CoreShadow"
+        },
+        {
+            "Id": "SystemStatusToCoreShadowGPU",
+            "Source": "arn:aws:lambda:us-west-2:227195268013:function:SystemStatus",
+            "Subject": "gpu/data",
+            "Target": "arn:aws:lambda:us-west-2:227195268013:function:CoreShadow"
+        },
+        {
+            "Id": "SystemStatusToCoreShadowRAM",
+            "Source": "arn:aws:lambda:us-west-2:227195268013:function:SystemStatus",
+            "Subject": "ram/data",
+            "Target": "arn:aws:lambda:us-west-2:227195268013:function:CoreShadow"
+        },
+        {
+            "Id": "SystemStatusToCoreShadowCB",
+            "Source": "arn:aws:lambda:us-west-2:227195268013:function:SystemStatus",
+            "Subject": "cb/data",
+            "Target": "arn:aws:lambda:us-west-2:227195268013:function:CoreShadow"
+        },
+        {
+            "Id": "SystemStatusToCoreShadowLED",
+            "Source": "arn:aws:lambda:us-west-2:227195268013:function:SystemStatus",
+            "Subject": "led/data",
+            "Target": "arn:aws:lambda:us-west-2:227195268013:function:CoreShadow"
+        },
+        {
+            "Id": "SystemStatusToCoreShadowCAM",
+            "Source": "arn:aws:lambda:us-west-2:227195268013:function:SystemStatus",
+            "Subject": "cam/data",
+            "Target": "arn:aws:lambda:us-west-2:227195268013:function:CoreShadow"
+        },
+        {
+            "Id": "LocalShadowToCoreShadowAccepted",
+            "Source": "arn:aws:iot:us-west-2:227195268013:thing/colibri_imx6_leo_Core",
+            "Subject": "$aws/things/colibri_imx6_leo_Core/shadow/update/accepted",
+            "Target": "arn:aws:lambda:us-west-2:227195268013:function:CoreShadow"
+        },
+        {
+            "Id": "LocalShadowToCoreShadowRejected",
+            "Source": "arn:aws:iot:us-west-2:227195268013:thing/colibri_imx6_leo_Core",
+            "Subject": "$aws/things/colibri_imx6_leo_Core/shadow/update/rejected",
+            "Target": "arn:aws:lambda:us-west-2:227195268013:function:CoreShadow"
+        },
+        {
+            "Id": "LocalShadowToDynamoDBDocuments",
+            "Source": "arn:aws:iot:us-west-2:227195268013:thing/colibri_imx6_leo_Core",
+            "Subject": "$aws/things/colibri_imx6_leo_Core/shadow/update/documents",
+            "Target": "arn:aws:lambda:us-west-2:227195268013:function:DynamoDB"
+        },
+        {
+            "Id": "CoreShadowToIoTCloudShadowUpdate",
+            "Source": "arn:aws:lambda:us-west-2:227195268013:function:CoreShadow",
+            "Subject": "$aws/things/colibri_imx6_leo_Core/shadow/update",
+            "Target": "arn:aws:iot:us-west-2:227195268013:iot:Publish"
+        },
+        {
+            "Id": "CoreShadowToLocalShadowUpdate",
+            "Source": "arn:aws:lambda:us-west-2:227195268013:function:CoreShadow",
+            "Subject": "$aws/things/colibri_imx6_leo_Core/shadow/update",
+            "Target": "arn:aws:iot:us-west-2:227195268013:thing/colibri_imx6_leo_Core"
+        },
+        {
+            "Id": "IoTCloudToSystemControlLED",
+            "Source": "arn:aws:iot:us-west-2:227195268013:iot:Publish",
+            "Subject": "led/brightness",
+            "Target": "arn:aws:lambda:us-west-2:227195268013:function:SystemControl"
+        },
+        {
+            "Id": "IoTCloudToSystemControlCB",
+            "Source": "arn:aws:iot:us-west-2:227195268013:iot:Publish",
+            "Subject": "cb/speed",
+            "Target": "arn:aws:lambda:us-west-2:227195268013:function:SystemControl"
+        }
+    ]
+}
