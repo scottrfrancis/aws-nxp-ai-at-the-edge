@@ -95,6 +95,13 @@ def function_handler(event, context):
 		Item={
 			'pk' : cpudatetime.split()[0],
 			'sk' : cpudatetime.split()[1] + '-cpu',
+			#'data' : {
+			#	'cpu' : {
+			#		'a53-temperature': Decimal(str(event["current"]["state"]["reported"]["cpu"]["temperatures"]["A53"])),
+			#		'a72-temperature': Decimal(str(event["current"]["state"]["reported"]["cpu"]["temperatures"]["A72"])),
+			#		'processing-load': Decimal(str(event["current"]["state"]["reported"]["cpu"]["usage"]))
+			#	}
+			#},
 			'system': 'cpu',
 			'a53-temperature': Decimal(str(event["current"]["state"]["reported"]["cpu"]["temperatures"]["A53"])),
 			'a72-temperature': Decimal(str(event["current"]["state"]["reported"]["cpu"]["temperatures"]["A72"])),
@@ -110,6 +117,13 @@ def function_handler(event, context):
 		Item={
 			'pk' : gpudatetime.split()[0],
 			'sk' : gpudatetime.split()[1] + '-gpu',
+			#'data' : {
+			#	'gpu' : {
+			#		'gpu0-temperature' : Decimal(str(event["current"]["state"]["reported"]["gpu"]["temperatures"]["GPU0"])),
+			#		'gpu1-temperature' : Decimal(str(event["current"]["state"]["reported"]["gpu"]["temperatures"]["GPU1"])),
+			#		'memory-load' : Decimal(str(event["current"]["state"]["reported"]["gpu"]["memoryUsage"]))
+			#	}
+			#},
 			'system': 'gpu',
 			'gpu0-temperature' : Decimal(str(event["current"]["state"]["reported"]["gpu"]["temperatures"]["GPU0"])),
 			'gpu1-temperature' : Decimal(str(event["current"]["state"]["reported"]["gpu"]["temperatures"]["GPU1"])),
@@ -125,6 +139,12 @@ def function_handler(event, context):
 	Item={
 			'pk' : ramdatetime.split()[0],
 			'sk' : ramdatetime.split()[1] + '-ram',
+			#'data' : {
+			#	'ram' : {
+			#		'memory-free' : Decimal(str(event["current"]["state"]["reported"]["ram"]["free"])),
+			#		'memory-load' : Decimal(str(event["current"]["state"]["reported"]["ram"]["usage"]))
+			#	}
+			#},
 			'system': 'ram',
 			'memory-free' : Decimal(str(event["current"]["state"]["reported"]["ram"]["free"])),
 			'memory-load' : Decimal(str(event["current"]["state"]["reported"]["ram"]["usage"]))
