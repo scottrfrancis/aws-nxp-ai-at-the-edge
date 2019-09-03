@@ -98,7 +98,7 @@ class DeviceCtrl:
 			return 0
 
 	def get_cb_speed(self):
-		return int(self.__cb_duty / self.__period)
+		return int(100 * self.__cb_duty / self.__period)
 
 	def get_led_brightness(self):
-		return int(self.__led_duty / self.__period)
+		return int(100 * self.__led_duty / self.__period)
