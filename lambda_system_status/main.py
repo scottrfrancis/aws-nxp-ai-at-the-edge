@@ -14,13 +14,15 @@ import time
 
 system_data_port = "5001"
 system_control_port = "5002"
+inference_info_port = "5003"
 rest = {
 	"cpu/data": "http://localhost:" + system_data_port + "/cpu",
 	"gpu/data": "http://localhost:" + system_data_port + "/gpu",
 	"ram/data": "http://localhost:" + system_data_port + "/ram",
-	"cam/data": "http://localhost:" + system_data_port + "/cam",
+	#"cam/data": "http://localhost:" + system_data_port + "/cam",
 	"cb/data": "http://localhost:" + system_control_port + "/cb",
-	"led/data": "http://localhost:" + system_control_port + "/led"
+	"led/data": "http://localhost:" + system_control_port + "/led",
+	"inference/data": "http://localhost:" + inference_info_port + "/inference"
 }
 
 # Creating a greengrass core sdk client
