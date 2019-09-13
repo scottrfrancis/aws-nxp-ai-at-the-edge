@@ -190,6 +190,27 @@ def function_handler(event, context):
 			]
 		}
 	)
+	try:
+		infres = {'result-list': []}
+		infcount = 0
+		for inference_timestamp in event["current"]["state"]["reported"]["inference"]["history"]:
+			inferencedatetime = datetime.utcfromtimestamp(int(float(inference_timestamp['timestamp']))).strftime('%Y-%m-%d %H:%M:%S')
+			inferenceCalcTime = int(1000*float(inference_timestamp['inference_time']))
+			for inference_result in inference_timestamp['last']:
+				infres['result-list'].append({
+					'pk' : inferencedatetime.split()[0],
+					'sk' : inferencedatetime.split()[1] + '-' + str(infcount) + '-inference-' + str(boardSerial),
+					'system': 'inference',
+					'pasta-type' : inference_result['object'],
+					'confidence' : int(1000*float(inference_result['score'])),
+					'inference-time' : inferenceCalcTime
+				})
+				infcount += 1
+	except Exception as e:
+		print("Unable to parse inference results list: " + repr(e))
+	else:
+		print("Dumping inference results list:")
+		print(str(infres))
 
 	logger.info("Response from DynaomDB request: ")
 	logger.info(res)
