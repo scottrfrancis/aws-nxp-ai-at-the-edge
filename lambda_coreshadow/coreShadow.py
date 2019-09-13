@@ -14,7 +14,7 @@ class CoreShadow:
         payload = {
             "state" : {
                     "reported" : {
-                        payload_context.split("/")[0]: payload_data
+                        payload_context: payload_data
                     }
             }
         }
