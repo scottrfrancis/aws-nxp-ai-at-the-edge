@@ -97,10 +97,3 @@ if __name__ == '__main__':
 else:
     print(__name__)
     print("Flask not working")
-
-# This is a dummy handler and will not be invoked
-# Instead the code above will be executed in an infinite loop for our example
-
-
-def function_handler(event, context):
-    return
