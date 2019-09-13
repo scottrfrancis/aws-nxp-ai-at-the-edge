@@ -73,6 +73,8 @@ class DeviceCtrl:
 	def set_cb_speed(self, percentage):
 		try:
 			self.__cb_duty = self.__percent_boundaries(percentage)
+			if self.__cb_duty > 0 and self.__cb_duty < 25:
+				self.__cb_duty = 25
 			self.__disable(self.__cb_index)
 			self.__set_duty_cycle(self.__cb_index, self.__cb_duty)
 			if self.__cb_duty > 0:
