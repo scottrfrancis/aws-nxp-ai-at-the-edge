@@ -88,6 +88,9 @@ class DeviceInfo:
 	def getCPUUsage(self):
 		return psutil.cpu_percent()
 
+	def getCPUUsageDetailed(self):
+		return psutil.cpu_percent(percpu=True)
+
 	def getRAMUsage(self):
 		return psutil.virtual_memory().percent
 

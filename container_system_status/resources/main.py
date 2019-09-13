@@ -24,11 +24,37 @@ api = Api(app)
 @app.route('/cpu')
 @cross_origin()
 def cpu_info():
-    ret = {'cores': deviceInfo.getCPUCoresCount(), 'temperatures': [],
-           'usage': 0}
-    ret['temperatures'] = {'A53': deviceInfo.getTemperatureCPUA53(
-    ), 'A72': deviceInfo.getTemperatureCPUA72()}
+    ret = {
+        'cores': deviceInfo.getCPUCoresCount(),
+        'temperatures': {
+            'A53': 0.0,
+            'A72': 0.0
+        },
+        'usage': 0.0,
+        'usageDetailed': {
+            'A53-0': 0.0,
+            'A53-1': 0.0,
+            'A53-2': 0.0,
+            'A53-3': 0.0,
+            'A72-0': 0.0,
+            'A72-1': 0.0
+        }
+    }
+    ret['temperatures'] = {
+        'A53': deviceInfo.getTemperatureCPUA53(),
+        'A72': deviceInfo.getTemperatureCPUA72()
+    }
     ret['usage'] = deviceInfo.getCPUUsage()
+
+    det = deviceInfo.getCPUUsageDetailed()
+    ret['usageDetailed'] = {
+        'A53-0': det[0],
+        'A53-1': det[1],
+        'A53-2': det[2],
+        'A53-3': det[3],
+        'A72-0': det[4],
+        'A72-1': det[5]
+    }
     return jsonify(ret)
 
 # GET requests for GPU
