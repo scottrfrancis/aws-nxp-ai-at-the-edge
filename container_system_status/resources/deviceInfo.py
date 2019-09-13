@@ -98,7 +98,7 @@ class DeviceInfo:
 		return round(psutil.virtual_memory().free / 1024 / 1024 / 1024, 4)
 
 	def getGPUMemoryUsage(self):
-		stuff = self.__bashCommand("cat /sys/kernel/debug/gc/meminfo");
+		stuff = self.__bashCommand("cat /sys/kernel/debug/gc/meminfo")
 		print(stuff.split())
 		slices = stuff.split()
 		used = int(slices[9])
