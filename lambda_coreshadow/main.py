@@ -70,6 +70,13 @@ def function_handler(event, context):
 		# Print confirmation
 		print("Device shadow updated: " + str(event))
 	else:
+		if subsys == "inference":
+			for inference_timestamp in event["history"]:
+				for inference_result in inference_timestamp['last']:
+					del inference_result["xmin"]
+					del inference_result["ymin"]
+					del inference_result["xmax"]
+					del inference_result["ymax"]
 		# Generate payload
 		#partialPayload = shadow.gen_payload(event, subsys)
 		#print(str(partialPayload))
