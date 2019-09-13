@@ -37,6 +37,12 @@
             "Target": "arn:aws:iot:us-west-2:227195268013:iot:Publish"
         },
         {
+            "Id": "SystemStatusToIoTCloudInfo",
+            "Source": "arn:aws:lambda:us-west-2:227195268013:function:SystemStatus",
+            "Subject": "info/data",
+            "Target": "arn:aws:iot:us-west-2:227195268013:iot:Publish"
+        },
+        {
             "Id": "SystemStatusToCoreShadowCPU",
             "Source": "arn:aws:lambda:us-west-2:227195268013:function:SystemStatus",
             "Subject": "cpu/data",
@@ -70,6 +76,12 @@
             "Id": "SystemStatusToCoreShadowCAM",
             "Source": "arn:aws:lambda:us-west-2:227195268013:function:SystemStatus",
             "Subject": "cam/data",
+            "Target": "arn:aws:lambda:us-west-2:227195268013:function:CoreShadow"
+        },
+        {
+            "Id": "SystemStatusToCoreShadowInfo",
+            "Source": "arn:aws:lambda:us-west-2:227195268013:function:SystemStatus",
+            "Subject": "info/data",
             "Target": "arn:aws:lambda:us-west-2:227195268013:function:CoreShadow"
         },
         {
