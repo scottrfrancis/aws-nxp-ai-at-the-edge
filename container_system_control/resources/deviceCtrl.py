@@ -27,7 +27,7 @@ class DeviceCtrl:
 		# Conveyor belt
 		self.__export(self.__cb_index)
 		self.__set_period(self.__cb_index, self.__period)
-		self.set_cb_speed(100)
+		self.set_cb_speed(40)
 
 		# LED
 		self.__export(self.__led_index)
