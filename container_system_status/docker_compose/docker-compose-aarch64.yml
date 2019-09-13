@@ -10,3 +10,4 @@ services:
         source: /sys
         target: /sys
         read_only: true
+    privileged: true

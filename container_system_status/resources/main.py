@@ -41,7 +41,7 @@ def gpu_info():
     ), 'GPU1': deviceInfo.getTemperatureGPU1()}
     return jsonify(ret)
 
-# GET requests for GPU
+# GET requests for RAM
 @app.route('/ram')
 @cross_origin()
 def ram_info():
@@ -49,10 +49,30 @@ def ram_info():
            'free': deviceInfo.getRAMFree()}
     return jsonify(ret)
 
-# GET requests for GPU
+# GET requests for System Info
 @app.route('/info')
 @cross_origin()
 def info():
+    ret = {
+        'board-serial': deviceInfo.getTdxSerialNumber(),
+        'board-type': deviceInfo.getTdxProductID(),
+        'board-revision': deviceInfo.getTdxProductRevision()
+    }
+    return jsonify(ret)
+
+# GET requests for Internet Connectivity
+@app.route('/internet')
+@cross_origin()
+def internet_info():
+    ret = {'connectivity': 0}
+    if internet():
+        ret['connectivity'] = 1
+    return jsonify(ret)
+
+# GET requests for everythig together, for the local UI
+@app.route('/all')
+@cross_origin()
+def all():
     retRam = {'total': deviceInfo.getRAMTotal(), 'usage': deviceInfo.getRAMUsage(),
            'free': deviceInfo.getRAMFree()}
     

@@ -4,6 +4,7 @@
 # Copyright 2019 Toradex AG. or its affiliates. All Rights Reserved.
 #
 
+import os.path as pcheck
 import subprocess
 import psutil
 import json
@@ -25,6 +26,18 @@ class DeviceInfo:
 		self.__cpu_a72_temperature = 0.0
 		self.__gpu0_temperature = 0.0
 		self.__gpu1_temperature = 0.0
+
+		self.__serial_number = "00000000"
+		self.__product_id = "0"
+		self.__product_revision = "0"
+
+		# Initial checks
+
+		# /proc/device-tree symlinks to /sys/firmware/devicetree/base
+		#self.DTDIR = '/proc/device-tree'
+		self.DTDIR = '/sys/firmware/devicetree/base/'
+		
+		self.dtdir_exist = pcheck.isdir(self.DTDIR)
 
 	def __bashCommand(self, cmd):
 		process = subprocess.Popen(cmd.split(), stdout=subprocess.PIPE)
@@ -93,3 +106,27 @@ class DeviceInfo:
 		free = int(slices[21])
 		return (used * 100) / free
 		#return 0
+
+	def getTdxSerialNumber(self):
+		if self.dtdir_exist:
+			with open(self.DTDIR + '/serial-number') as f:
+				self.__serial_number = f.read().rstrip('\x00')
+		return int(self.__serial_number)
+
+	def getTdxProductID(self):
+		if self.dtdir_exist:
+			# Get SKU and module version
+			with open(self.DTDIR + '/toradex,product-id') as f:
+				self.__product_id = f.read().rstrip('\x00')
+			try: # try to decode a number to an actual human readable info
+				self.__product_id = self._module_info_decode(int(self.__product_id)) 
+			except AttributeError:
+				pass  # just provide 'undefined'
+		return self.__product_id
+
+
+	def getTdxProductRevision(self):
+		if self.dtdir_exist:
+			with open(self.DTDIR + '/toradex,board-rev') as f:
+				self.__product_revision = f.read().rstrip('\x00')
+		return self.__product_revision
