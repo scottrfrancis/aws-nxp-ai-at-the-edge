@@ -63,26 +63,12 @@ except ClientError as e:
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-# This is a long lived lambda so we can keep state as below
-totalTraffic = 0
-totalGreenlights = 0
-minCars = -1
-maxCars = -1
-
 # This handler is called when an event is sent via MQTT
 # Event targets are set in subscriptions settings
 # This should be set up to listen to shadow document updates
 # This function gets traffic light updates from the shadow MQTT event
 def function_handler(event, context):
-	global totalTraffic
-	global totalGreenlights
-	global minCars
-	global maxCars
 
-	# grab the light status from the event
-    # Shadow JSON schema:
-    # { "state": { "desired": { "property":<R,G,Y> } } }
-	logger.info(event)
 
 	# Record full system snapshot to DynamoDB
 	global tableName
