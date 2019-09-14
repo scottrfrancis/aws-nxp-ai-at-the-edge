@@ -7,6 +7,7 @@ import greengrasssdk
 import boto3
 from botocore.exceptions import ClientError
 import logging
+import pprint
 
 # helper
 from random import *
@@ -14,6 +15,8 @@ import time
 from datetime import datetime
 import json
 from decimal import Decimal
+
+pp = pprint.PrettyPrinter(indent=4)
 
 shadowTopic = "$aws/things/colibri_imx6_leo_Core/shadow/update"
 
@@ -132,21 +135,6 @@ def function_handler(event, context):
 				{
 					'PutRequest' :{
 						'Item': {
-							'pk' : inferencedatetime.split()[0],
-							'sk' : inferencedatetime.split()[1] + '-inference-' + str(boardSerial),
-							'system': 'inference',
-							'pasta-type' : Decimal(randrange(0, 4)),
-							'confidence' : Decimal(str(uniform(0.0, 100.0))),
-							'inference-time' : Decimal(randrange(75, 483))
-							#'pasta-type' : Decimal(str(event["current"]["state"]["reported"]["inference"]["pasta-type"])),
-							#'confidence' : Decimal(str(event["current"]["state"]["reported"]["inference"]["confidence"])),
-							#'inference-time' : Decimal(str(event["current"]["state"]["reported"]["inference"]["inference-time"]))
-						}
-					}
-				},
-				{
-					'PutRequest' :{
-						'Item': {
 							'pk' : cbdatetime.split()[0],
 							'sk' : cbdatetime.split()[1] + '-cb-' + str(boardSerial),
 							'system': 'cb',
@@ -164,18 +152,6 @@ def function_handler(event, context):
 						}
 					}
 				},
-				#{
-				#	'PutRequest' :{
-				#		'Item': {
-				#			'pk' : leddatetime.split()[0],
-				#			'sk' : leddatetime.split()[1] + '-info-' + str(boardSerial),
-				#			'system': 'info',
-				#			'board-revision' : event["current"]["state"]["reported"]["info"]["board-revision"],
-				#			'board-serial': event["current"]["state"]["reported"]["info"]["board-serial"],
-				#			'board-type': event["current"]["state"]["reported"]["info"]["board-type"]
-				#		}
-				#	}
-				#}
 				{
 					'PutRequest' :{
 						'Item': {
@@ -190,6 +166,9 @@ def function_handler(event, context):
 			]
 		}
 	)
+	logger.info("Response from DynaomDB generic request: ")
+	logger.info(res)
+
 	try:
 		infres = {'result-list': []}
 		infcount = 0
@@ -198,21 +177,32 @@ def function_handler(event, context):
 			inferenceCalcTime = int(1000*float(inference_timestamp['inference_time']))
 			for inference_result in inference_timestamp['last']:
 				infres['result-list'].append({
-					'pk' : inferencedatetime.split()[0],
-					'sk' : inferencedatetime.split()[1] + '-' + str(infcount) + '-inference-' + str(boardSerial),
-					'system': 'inference',
-					'pasta-type' : inference_result['object'],
-					'confidence' : int(1000*float(inference_result['score'])),
-					'inference-time' : inferenceCalcTime
+					'PutRequest': {
+						'Item': {
+							'pk' : inferencedatetime.split()[0],
+							'sk' : inferencedatetime.split()[1] + '-' + str(infcount) + '-inference-' + str(boardSerial),
+							'system': 'inference',
+							'pasta-type' : inference_result['object'],
+							'confidence' : int(100*float(inference_result['score'].replace('[','').replace(']',''))),
+							'inference-time' : inferenceCalcTime
+						}
+					}
 				})
 				infcount += 1
 	except Exception as e:
 		print("Unable to parse inference results list: " + repr(e))
+		print("Dumping raw data:")
+		pp.pprint(event["current"]["state"]["reported"]["inference"]["history"])
 	else:
 		print("Dumping inference results list:")
 		print(str(infres))
-
-	logger.info("Response from DynaomDB request: ")
-	logger.info(res)
+		if infres['result-list']:
+			res = dynamodb.batch_write_item(
+				RequestItems={
+					tableName : infres['result-list']
+				}
+			)
+			logger.info("Response from DynaomDB inference request: ")
+			logger.info(res)
 
 	return
