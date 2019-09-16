@@ -140,6 +140,7 @@ historyValues = {
 			"brightness": 0
 		},
 		"inference": {
+			"log-count": 0,
 			"inference-time": 0,
 			"inference-time-count": 0,
 			"penne": {
@@ -621,7 +622,7 @@ def function_handler(event, context):
 							'sk' : staticValues["info"]["board-serial"],
 							'board-revision' : staticValues["info"]["board-revision"],
 							'board-type': staticValues["info"]["board-type"],
-							'last-update-time': datetimes["now"]["info"],
+							'last-updated-time': datetimes["now"]["info"],
 							'log-count': staticValues["info"]["log-count"]
 						}
 					}
