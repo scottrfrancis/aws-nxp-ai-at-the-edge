@@ -18,7 +18,12 @@ from decimal import Decimal
 
 pp = pprint.PrettyPrinter(indent=4)
 
-shadowTopic = "$aws/things/colibri_imx6_leo_Core/shadow/update"
+shadowTopic = {
+	"6438725" : "apalis-imx8-cb-brazil_Core",
+	"6494620": "colibri_imx6_leo_Core"
+}
+
+#shadowTopic = "$aws/things/colibri_imx6_leo_Core/shadow/update"
 
 dynamodb = boto3.resource('dynamodb', region_name='us-west-2')
 #tableName = "PastaDemo"
