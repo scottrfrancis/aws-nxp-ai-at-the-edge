@@ -102,6 +102,7 @@ staticValues = {
 		'board-serial': 0,
 		'board-revision' : "0",
 		'board-type': "0",
+		'log-count': 0
 	}
 }
 
@@ -142,18 +143,22 @@ historyValues = {
 			"inference-time": 0,
 			"inference-time-count": 0,
 			"penne": {
+				"log-count": 0,
 				"confidence": 0,
 				"pasta-count": 0
 			},
 			"farfalle": {
+				"log-count": 0,
 				"confidence": 0,
 				"pasta-count": 0
 			},
 			"elbow": {
+				"log-count": 0,
 				"confidence": 0,
 				"pasta-count": 0
 			},
 			"shell": {
+				"log-count": 0,
 				"confidence": 0,
 				"pasta-count": 0
 			}
@@ -257,6 +262,8 @@ def function_handler(event, context):
 		print("Unable to get board info: " + repr(e))
 		traceback.print_exc()
 	else:
+		# update data for board info
+		staticValues["info"]["log-count"] += 1
 		try: # update data for CPU
 			# last
 			historyValues["last"]["cpu"]["a53-temperature"] = event["current"]["state"]["reported"]["cpu"]["temperatures"]["A53"]
@@ -614,7 +621,8 @@ def function_handler(event, context):
 							'sk' : staticValues["info"]["board-serial"],
 							'board-revision' : staticValues["info"]["board-revision"],
 							'board-type': staticValues["info"]["board-type"],
-							'last-update-time': datetimes["now"]["info"]
+							'last-update-time': datetimes["now"]["info"],
+							'log-count': staticValues["info"]["log-count"]
 						}
 					}
 				}
