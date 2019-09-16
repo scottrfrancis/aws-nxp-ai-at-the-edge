@@ -27,7 +27,7 @@ shadowTopic = {
 
 dynamodb = boto3.resource('dynamodb', region_name='us-west-2')
 #tableName = "PastaDemo"
-tableName = "sebaPastaNewRepoDev-sebaPastaNewRepoDevApiDynamoDbTable-5KJC1F84OO7F"
+tableName = "awsPastaDemoDev-awsPastaDemoDevApiDynamoDbTable-126ZC54I1FJDS"
 
 # Create the dynamo db table if needed
 try:
