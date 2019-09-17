@@ -91,11 +91,8 @@ def info():
 @cross_origin()
 def internet_info():
     ret = {'connectivity': 0,
-        'GeoIP': ""
+        'GeoIP': deviceInfo.getGeoIP()
     }
-    if internet():
-        ret['connectivity'] = 1
-        ret['GeoIP'] = deviceInfo.getGeoIP()
     return jsonify(ret)
 
 # GET requests for everythig together, for the local UI
