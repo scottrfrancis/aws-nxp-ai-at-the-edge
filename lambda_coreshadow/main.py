@@ -10,7 +10,9 @@ import json
 
 shadowThing = {
 	"6438725" : "apalis-imx8-cb-brazil_Core",
-	"6494620": "colibri_imx6_leo_Core"
+	"6494620": "colibri_imx6_leo_Core",
+	"6494595": "apalis-imx8-cb-seattle_Core",
+	"6494612": "apalis-imx8-cb-milan_Core"
 }
 #shadowThing = "colibri_imx6_leo_Core"
 
