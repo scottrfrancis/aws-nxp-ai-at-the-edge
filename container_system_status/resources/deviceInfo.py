@@ -162,11 +162,11 @@ class DeviceInfo:
 		self.__latitude = response.location.latitude
 		self.__longitude =response.location.longitude
 
-		response = { "ISO" : self.__country_iso_code
-				 	,"country" : self.__country_name
-					,"zip" : self.__postal_code
-					,"state" : self.__state_name
-					,"city" : self.__city_name
-					,"lat" : self.__latitude
-				 	,"long" : self.__longitude}
+		response = (	'{"ISO":"'		+ self.__country_iso_code + '"' +
+				 		',"country":"'	+ self.__country_name + '"' +
+						',"zip":"'		+ self.__postal_code + '"' +
+		 				',"state":"'	+ self.__state_name + '"' +
+						',"city":"'		+ self.__city_name + '"' +
+						',"lat":'		+ str(self.__latitude) +
+		 				',"long":'		+ str(self.__longitude)+'}')
 		return response
