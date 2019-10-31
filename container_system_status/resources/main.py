@@ -90,12 +90,9 @@ def info():
 @app.route('/internet')
 @cross_origin()
 def internet_info():
-    ret = {'connectivity': 0,
-        'GeoIP': ""
-    }
+    ret = {'connectivity': 0}
     if internet():
         ret['connectivity'] = 1
-        ret['GeoIP'] = deviceInfo.getGeoIP()
     return jsonify(ret)
 
 # GET requests for everythig together, for the local UI
@@ -104,7 +101,7 @@ def internet_info():
 def all():
     retRam = {'total': deviceInfo.getRAMTotal(), 'usage': deviceInfo.getRAMUsage(),
            'free': deviceInfo.getRAMFree()}
-
+    
     retGpu = {'cores': 2, 'temperatures': [],
            'memoryUsage': deviceInfo.getGPUMemoryUsage()}
     retGpu['temperatures'] = {'GPU0': deviceInfo.getTemperatureGPU0(
@@ -116,7 +113,7 @@ def all():
     retCpu['temperatures'] = {'A53': deviceInfo.getTemperatureCPUA53(
     ), 'A72': deviceInfo.getTemperatureCPUA72()}
     retCpu['usage'] = deviceInfo.getCPUUsage()
-
+    
     ret = {'ram': retRam, 'gpu': retGpu, 'cpu': retCpu}
     return jsonify(ret)
 

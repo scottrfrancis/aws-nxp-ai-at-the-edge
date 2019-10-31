@@ -8,8 +8,6 @@ import os.path as pcheck
 import subprocess
 import psutil
 import json
-import geoip2.database
-import requests
 
 __author__ = 'Matheus Castello'
 __version__ = '0.0'
@@ -33,23 +31,13 @@ class DeviceInfo:
 		self.__product_id = "0"
 		self.__product_revision = "0"
 
-		self.__country_iso_code = "unknown"
-		self.__country_name = ""
-		self.__postal_code = ""
-		self.__state_name = ""
-		self.__city_name = ""
-		self.__latitude = 0.0
-		self.__longitude =0.0
-
-
 		# Initial checks
 
 		# /proc/device-tree symlinks to /sys/firmware/devicetree/base
 		#self.DTDIR = '/proc/device-tree'
 		self.DTDIR = '/sys/firmware/devicetree/base/'
-
+		
 		self.dtdir_exist = pcheck.isdir(self.DTDIR)
-
 
 	def __bashCommand(self, cmd):
 		process = subprocess.Popen(cmd.split(), stdout=subprocess.PIPE)
@@ -134,7 +122,7 @@ class DeviceInfo:
 			with open(self.DTDIR + '/toradex,product-id') as f:
 				self.__product_id = f.read().rstrip('\x00')
 			try: # try to decode a number to an actual human readable info
-				self.__product_id = self._module_info_decode(int(self.__product_id))
+				self.__product_id = self._module_info_decode(int(self.__product_id)) 
 			except AttributeError:
 				pass  # just provide 'undefined'
 		return self.__product_id
@@ -145,28 +133,3 @@ class DeviceInfo:
 			with open(self.DTDIR + '/toradex,board-rev') as f:
 				self.__product_revision = f.read().rstrip('\x00')
 		return self.__product_revision
-
-	def getGeoIP(self):
-
-		try:
-		    my_ip = requests.get('https://api.ipify.org').text
-		except requests.exceptions.RequestException as e:  # This is the correct syntax
-		    sys.exit(1)
-		reader = geoip2.database.Reader('./GeoLite2-City_20190903/GeoLite2-City.mmdb')
-		response = reader.city(my_ip)
-		self.__country_iso_code = response.country.iso_code
-		self.__country_name = response.country.name
-		self.__postal_code = response.postal.code
-		self.__state_name = response.subdivisions.most_specific.name
-		self.__city_name = response.city.name
-		self.__latitude = response.location.latitude
-		self.__longitude =response.location.longitude
-
-		response = (	'{"ISO":"'		+ self.__country_iso_code + '"' +
-				 		',"country":"'	+ self.__country_name + '"' +
-						',"zip":"'		+ self.__postal_code + '"' +
-		 				',"state":"'	+ self.__state_name + '"' +
-						',"city":"'		+ self.__city_name + '"' +
-						',"lat":'		+ str(self.__latitude) +
-		 				',"long":'		+ str(self.__longitude)+'}')
-		return response

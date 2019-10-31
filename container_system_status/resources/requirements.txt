@@ -3,4 +3,3 @@ flask-cors
 flask-jsonpify
 flask-restful
 psutil
-geoip2
