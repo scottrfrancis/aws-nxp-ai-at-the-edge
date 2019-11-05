@@ -39,7 +39,7 @@ if (sys.version_info[0] < 3):
 class_names =['shell','elbow','penne','tortellini', 'farfalle']
 
 # size used for inference
-net_input_size=224
+net_input_size=240
 number_of_pixels = net_input_size*net_input_size
 # RGB means
 redmean=255*0.4401859057358472
@@ -136,7 +136,7 @@ def pasta_detection(image_in, width = 320, height = 240):
     img = imageio.imread('/dev/shm/tmp_image.jpg')
     img = img.astype('float64')
 
-    image_in = img[8:232,48:272,:]
+    image_in = img[0:240,40:280,:]
     image_in = image_in.reshape((number_of_pixels ,3))
     image_in =np.transpose(image_in)
     image_in[0,:] = image_in[0,:]-redmean
@@ -164,10 +164,10 @@ def pasta_detection(image_in, width = 320, height = 240):
             this_result = result(
                         score= scores[i],
                         object= this_object,
-                        xmin= bounding_boxes[i][0]+48,
-                        xmax= bounding_boxes[i][2]+48,
-                        ymin= bounding_boxes[i][1]+8,
-                        ymax= bounding_boxes[i][3]+8,
+                        xmin= bounding_boxes[i][0]+40,
+                        xmax= bounding_boxes[i][2]+40,
+                        ymin= bounding_boxes[i][1],
+                        ymax= bounding_boxes[i][3],
                         time=t3)
 
             if((bounding_boxes[i][2]-bounding_boxes[i][0]<=net_input_size/2)
