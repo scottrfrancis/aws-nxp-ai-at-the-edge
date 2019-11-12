@@ -7,10 +7,6 @@ Parameters:
     Description: Green Core name to be created. A "Thing" with be created with _Core appended to the name
     Type: String
     Default: pasta_demo_cfn
-  ThingSerial:
-    Description: The Toradex board serial
-    Type: String
-    Default: 6438725
   S3BucketName:
     AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
     Default: aws-quickstart
@@ -378,7 +374,7 @@ Resources:
           def function_handler(event, context):
               return
 
-  GGCoreShadowFunction:
+ GGCoreShadowFunction:
     Type: AWS::Lambda::Function
     Properties:
       FunctionName: "CoreShadow_cfn"
@@ -388,8 +384,186 @@ Resources:
       Role: !GetAtt LambdaExecutionRole.Arn
       Timeout: 60
       Code:
-        S3Bucket: !Sub "${S3BucketName}"
-        S3Key: functions/cshadow.zip
+        ZipFile: !Sub |
+          import greengrasssdk
+          import time
+          import json
+
+          class CloudWatch:
+
+              def __init__(self):
+                  self.payload_cpu_load = {
+                      "request": {
+                          "namespace": "Greengrass",
+                          "metricData": {
+                              "metricName": "cpu_load",
+                              "dimensions": [
+                                  {
+                                      "name": "cpu",
+                                      "value": "Data related to CPU"
+                                  },
+                                  {
+                                      "name": "cpu_load",
+                                      "value": "Percentage of CPU used"
+                                  }
+                              ],
+                              "timestamp" : self.time_ms(),
+                              "value": 0,
+                              "unit": "Percent"
+                          }
+                      }
+                  }
+                  self.payload_gpu_load = {
+                      "request": {
+                          "namespace": "Greengrass",
+                          "metricData": {
+                              "metricName": "gpu_mem_usage",
+                              "dimensions": [
+                                  {
+                                      "name": "SerialNumber",
+                                      "value": "0000000"
+                                  },
+                                  {
+                                      "name": "ModuleType",
+                                      "value": "Apalis iMX8"
+                                  },
+                                  {
+                                      "name": "ModuleVersion",
+                                      "value": "V1.0B"
+                                  }
+                              ],
+                              "timestamp" : int(time.time()*1000),
+                              "value": 0,
+                              "unit": "Kilobytes"
+                          }
+                      }
+                  }
+              
+              def form_payload_cpu_load(self, cpu_percent):
+                  """ Form the payload """
+                  self.payload_cpu_load["request"]["metricData"]["timestamp"] = self.time_ms()
+                  self.payload_cpu_load["request"]["metricData"]["value"] = cpu_percent
+                  return json.dumps(self.payload_cpu_load)
+
+              def form_payload_gpu_load(self, gpu_mem):
+                  """ Form the payload """
+                  self.payload_gpu_load["request"]["metricData"]["timestamp"] = self.time_ms()
+                  self.payload_gpu_load["request"]["metricData"]["value"] = gpu_mem
+                  return json.dumps(self.payload_gpu_load)
+
+              def time_ms(self):
+                  return int(time.time()*1000)
+
+          class CoreShadow:
+
+              def __init__(self):
+                  return
+
+              def gen_payload(self, payload_data, payload_context):
+                  """ stateData as the object that goes into state/reported.
+                  Works well for cpu/data, gpu/data and ram/data.
+                  Will work well with any other payloads that already come as JSON
+                  friendly objects """
+
+                  payload = {
+                      "state" : {
+                              "reported" : {
+                                  payload_context: payload_data
+                              }
+                      }
+                  }
+
+                  return json.dumps(payload)
+
+          shadowThing = "${CoreName}_Core"
+
+          # Creating a greengrass core sdk client
+          client = greengrasssdk.client('iot-data')
+
+          # Shadow payload generation class
+          shadow = CoreShadow()
+
+          # 0 | info | cpu | gpu | ram | inference | cb | led
+          bitwise = {
+            "cpu" : int('0b11011111', 2),
+            "gpu" : int('0b11101111', 2),
+            "ram" : int('0b11110111', 2),
+            "inference" : int('0b11111011', 2),
+            "cb" : int('0b11111101', 2),
+            "led" : int('0b11111110', 2),
+            "info": int('0b10111111', 2),
+          }
+          ready = int('0b01111011', 2)
+          tryToSendCount = 0
+          shadowPayload = {"state" : {"reported": {}}}
+
+
+          def ready_is_ready(subsys):
+            global ready
+            global bitwise
+
+            ready = ready & bitwise[subsys]
+            #print("Ready on zero. Current value is: " + format(ready, '#010b'))
+
+          def ready_reset():
+            global ready
+            global tryToSendCount
+            global shadowPayload
+
+            ready = int('0b01111011', 2)
+            tryToSendCount = 0
+            shadowPayload["state"]["reported"].clear()
+
+          def ready_pass():
+            global tryToSendCount
+
+            tryToSendCount += 1
+
+
+          def function_handler(event, context):
+            global shadowPayload
+            global tryToSendCount
+
+            serial = "000"
+            subsys = context.client_context.custom['subject'].split("/")[0]
+            try:
+              serial = context.client_context.custom['subject'].split("/")[1]
+            except:
+              pass
+
+            print("Incoming event: " + subsys + " from board ID: " + serial)
+
+            if subsys == "$aws":
+              # Print confirmation
+              print("Device shadow updated: " + str(event))
+            else:
+              if subsys == "inference":
+                for inference_timestamp in event["history"]:
+                  for inference_result in inference_timestamp['last']:
+                    del inference_result["xmin"]
+                    del inference_result["ymin"]
+                    del inference_result["xmax"]
+                    del inference_result["ymax"]
+              # Generate payload
+              #partialPayload = shadow.gen_payload(event, subsys)
+              #print(str(partialPayload))
+              shadowPayload["state"]["reported"].update({subsys: event})
+              ready_is_ready(subsys)
+              # send only after getting all data from system or not getting all data
+              # for too long
+              if ready == 0 or tryToSendCount >= 15:
+                #print("Data buffer filled, sending updated device shadow!")
+                #print(str(shadowPayload))
+                res = client.update_thing_shadow(
+                  thingName = shadowThing[serial],
+                  payload = json.dumps(shadowPayload)
+                ) # res is not being checked for success
+                ready_reset()
+              else:
+                ready_pass()
+
+            return
+
 
   GGDynamoDBFunction:
     Type: AWS::Lambda::Function
