@@ -106,9 +106,11 @@ ConfigJson=$(aws cloudformation describe-stacks --stack-name "PastaDemoCFN" \
 
 echo -n "${certificatePem}" > certs/cert.pem
 echo -n "${certificatePrivateKey}" > certs/cert.key
-echo -n "${ConfigJson}" > config/config.json
+echo -n "${ConfigJson}" > certs/config.json
 
 tar -czvf pastaDemo-certs.tar.gz certs/ config/
 mv pastaDemo-certs.tar.gz certs/
-mv certs/ /greengrass/
-mv config/ /greengrass/
+# move the files
+mv certs/cert.pem /greengrass/certs/
+mv certs/cert.key /greengrass/certs/
+mv certs/config.json /greengrass/certs/
