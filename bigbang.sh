@@ -109,3 +109,4 @@ echo -n "${certificatePrivateKey}" > certs/cert.key
 echo -n "${ConfigJson}" > config/config.json
 
 tar -czvf pastaDemo-certs.tar.gz certs/ config/
+mv pastaDemo-certs.tar.gz certs/
