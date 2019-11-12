@@ -2,7 +2,7 @@ version: '3.7'
 services:
   system-info:
     network_mode: host
-    image: leograba/pasta-demo-system-info:latest-arm64v8
+    image: torizonextras/pasta-demo-system-info:latest-arm64v8
     ports:
       - "5001:5001"
     volumes:

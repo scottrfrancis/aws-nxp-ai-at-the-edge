@@ -5,4 +5,4 @@ services:
       # This is relative to docker_compose directory in the current project
       context: ../resources
       dockerfile: ../dockerfiles/Dockerfile-x86
-    image: leograba/pasta-demo-system-info:latest-x86
+    image: torizonextras/pasta-demo-system-info:latest-x86
