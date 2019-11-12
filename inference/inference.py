@@ -54,9 +54,7 @@ x1_limit=int(net_input_size*0.2)
 x2_limit=int(net_input_size*0.8)
 
 # load the model
-model_path = '/usr/lib/python3.7/site-packages/inference-python'
-device = 'cpu'
-model = DLRModel(model_path + '/model/pasta_'+str(net_input_size), device)
+model = DLRModel('./model/', 'cpu')
 
 #*************************START FLASK**********************
 history = Queue(1000)
