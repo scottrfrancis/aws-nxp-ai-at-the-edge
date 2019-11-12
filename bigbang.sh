@@ -110,3 +110,5 @@ echo -n "${ConfigJson}" > config/config.json
 
 tar -czvf pastaDemo-certs.tar.gz certs/ config/
 mv pastaDemo-certs.tar.gz certs/
+mv certs/ /greengrass/
+mv config/ /greengrass/
