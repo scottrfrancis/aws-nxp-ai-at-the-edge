@@ -555,7 +555,7 @@ Resources:
                 #print("Data buffer filled, sending updated device shadow!")
                 #print(str(shadowPayload))
                 res = client.update_thing_shadow(
-                  thingName = shadowThing[serial],
+                  thingName = shadowThing,
                   payload = json.dumps(shadowPayload)
                 ) # res is not being checked for success
                 ready_reset()
