@@ -374,7 +374,7 @@ Resources:
           def function_handler(event, context):
               return
 
- GGCoreShadowFunction:
+  GGCoreShadowFunction:
     Type: AWS::Lambda::Function
     Properties:
       FunctionName: "CoreShadow_cfn"
@@ -563,7 +563,6 @@ Resources:
                 ready_pass()
 
             return
-
 
   GGDynamoDBFunction:
     Type: AWS::Lambda::Function
