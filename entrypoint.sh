@@ -13,6 +13,18 @@ echo '[default]
 region=us-west-2
 output=json' > config
 
+# dashboard big bang
+cd /aws-nxp-ai-at-the-edge-cloud-dashboard
+
+echo '{
+  "name": "pastaDemoAWSCFN",
+  "awsAdminProfile": "default",
+  "awsRegion": "us-west-2"
+}' > appConfig.json
+
+yarn deploy
+yarn update
+
 # run the script
 export PATH=$PATH:/root/.local/bin
 cd /aws-nxp-ai-at-the-edge
@@ -118,4 +130,5 @@ def function_handler(event, context):
 	return
 ' > lambda_coreshadow/main.py
 
+# GG big bang
 ./bigbang.sh $1 $2
