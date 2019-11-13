@@ -530,6 +530,9 @@ Resources:
                 Resource: "*"
 
 Outputs:
+  IoTEndpoint:
+    Description: "IoT Endpoint"
+    Value: !GetAtt IoTThing.iotEndpoint
   CertificatePem:
     Description: "IoT Certificate Pem"
     Value: !GetAtt IoTThing.certificatePem
