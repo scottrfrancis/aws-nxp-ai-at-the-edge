@@ -38,9 +38,6 @@ if (sys.version_info[0] < 3):
 # ------------------------------------------------------------------ INFERENCE
 class_names =['shell','elbow','penne','tortellini', 'farfalle']
 
-# size used for inference
-net_input_size=240
-number_of_pixels = net_input_size*net_input_size
 # RGB means
 redmean=255*0.4401859057358472
 gremean=255*0.5057172186334968
@@ -49,12 +46,22 @@ redstd=255*0.24873837809532068
 grestd=255*0.17898858615083552
 blustd=255*0.3176466480114065
 
-#bbox limits to avoid reflection
-x1_limit=int(net_input_size*0.2)
-x2_limit=int(net_input_size*0.8)
-
 # load the model
 model = DLRModel('./model/', 'cpu')
+
+try:
+    # size used for inference
+    net_input_size=224
+    number_of_pixels = net_input_size*net_input_size
+    image_in=[0]*(net_input_size*net_input_size*3)
+    input_data = {'data': image_in}
+    outputs = model.run(input_data) #need to be a list of input arrays matching input names
+    print('input size of the model: 224')
+except:
+    # size used for inference
+    net_input_size=240
+    number_of_pixels = net_input_size*net_input_size
+    print('input size of the model: 240')
 
 #*************************START FLASK**********************
 history = Queue(1000)
@@ -134,7 +141,8 @@ def pasta_detection(image_in, width = 320, height = 240):
     img = imageio.imread('/dev/shm/tmp_image.jpg')
     img = img.astype('float64')
 
-    image_in = img[0:240,40:280,:]
+    image_in = img[	int(img.shape[0]/2-net_input_size/2):int(img.shape[0]/2+net_input_size/2), \
+    		int(img.shape[1]/2-net_input_size/2):int(img.shape[1]/2+net_input_size/2),:]
     image_in = image_in.reshape((number_of_pixels ,3))
     image_in =np.transpose(image_in)
     image_in[0,:] = image_in[0,:]-redmean
