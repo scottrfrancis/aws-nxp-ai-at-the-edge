@@ -379,7 +379,7 @@ Resources:
     Properties:
       FunctionName: "CoreShadow_cfn"
       Description: Core Shadow Pasta Demo
-      Handler: index.function_handler
+      Handler: main.function_handler
       Runtime: python3.7
       Role: !GetAtt LambdaExecutionRole.Arn
       Timeout: 60
@@ -392,7 +392,7 @@ Resources:
     Properties:
       FunctionName: "DynamoDB_cfn"
       Description: Dynamo DB pasta demo
-      Handler: index.function_handler
+      Handler: main.function_handler
       Runtime: python3.7
       Role: !GetAtt LambdaExecutionRole.Arn
       Timeout: 60
@@ -405,7 +405,7 @@ Resources:
     Properties:
       FunctionName: "SystemControl_cfn"
       Description: System control pasta demo
-      Handler: index.function_handler
+      Handler: main.function_handler
       Runtime: python3.7
       Role: !GetAtt LambdaExecutionRole.Arn
       Timeout: 60
@@ -418,7 +418,7 @@ Resources:
     Properties:
       FunctionName: "SystemStatus_cfn"
       Description: Long running lambda that provides telemetry and pub/sub echo
-      Handler: index.function_handler
+      Handler: main.function_handler
       Runtime: python3.7
       Role: !GetAtt LambdaExecutionRole.Arn
       Timeout: 60
