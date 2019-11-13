@@ -15,5 +15,5 @@ output=json' > config
 
 # run the script
 export PATH=$PATH:/root/.local/bin
-cd /aws-nxp-ai-at-the-edge.git
+cd /aws-nxp-ai-at-the-edge
 ./bigbang.sh $1
