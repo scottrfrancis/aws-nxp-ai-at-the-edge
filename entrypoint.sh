@@ -5,8 +5,8 @@ cd ~/.aws
 
 # add the credentias
 echo '[default]
-aws_access_key_id='$2'
-aws_secret_access_key='$3 > credentials
+aws_access_key_id='$3'
+aws_secret_access_key='$4 > credentials
 
 # add the config
 echo '[default]
@@ -28,7 +28,7 @@ from coreShadow import CoreShadow
 
 import json
 
-shadowThing = "'$1'_Core"
+shadowThing = "'$2'_Core"
 
 # Creating a greengrass core sdk client
 client = greengrasssdk.client("iot-data")
@@ -118,4 +118,4 @@ def function_handler(event, context):
 	return
 ' > lambda_coreshadow/main.py
 
-./bigbang.sh $1
+./bigbang.sh $1 $2

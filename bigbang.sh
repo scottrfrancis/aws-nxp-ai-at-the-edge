@@ -74,6 +74,7 @@ aws cloudformation \
     --stack-name "PastaDemoCFN" \
     --template-body file://pasta_demo_cfn.yml \
     --parameters ParameterKey=S3BucketName,ParameterValue=$1 \
+    ParameterKey=CoreName,ParameterValue=$2 \
     --region "us-west-2" \
     --capabilities CAPABILITY_IAM
 
@@ -102,6 +103,10 @@ certificatePrivateKey=$(aws cloudformation describe-stacks --stack-name "PastaDe
 
 ConfigJson=$(aws cloudformation describe-stacks --stack-name "PastaDemoCFN" \
     --query 'Stacks[0].Outputs[?OutputKey==`ConfigJson`].OutputValue' \
+    --output text)
+
+iotEndpoint=$(aws cloudformation describe-stacks --stack-name "PastaDemoCFN" \
+    --query 'Stacks[0].Outputs[?OutputKey==`IoTEndpoint`].OutputValue' \
     --output text)
 
 echo -n "${certificatePem}" > certs/cert.pem
