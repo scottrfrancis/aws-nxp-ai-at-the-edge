@@ -22,6 +22,7 @@ echo '{
   "awsRegion": "us-west-2"
 }' > appConfig.json
 
+yarn install
 yarn deploy
 yarn update
 
