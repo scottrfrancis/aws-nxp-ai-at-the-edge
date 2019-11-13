@@ -126,3 +126,5 @@ cd /aws-nxp-ai-at-the-edge-cloud-dashboard
 echo '// eslint-disable-next-line import/prefer-default-export
 export const region = "us-west-2"
 export const iotEndpoint = "'$iotEndpoint'"' > src/shared/constants/aws.js
+
+yarn update
