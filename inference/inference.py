@@ -170,10 +170,10 @@ def pasta_detection(image_in, width = 320, height = 240):
             this_result = result(
                         score= scores[i],
                         object= this_object,
-                        xmin= bounding_boxes[i][0]+40,
-                        xmax= bounding_boxes[i][2]+40,
-                        ymin= bounding_boxes[i][1],
-                        ymax= bounding_boxes[i][3],
+                        xmin= bounding_boxes[i][0]+160-(net_input_size/2),
+                        xmax= bounding_boxes[i][2]+160-(net_input_size/2),
+                        ymin= bounding_boxes[i][1]+120-(net_input_size/2),
+                        ymax= bounding_boxes[i][3]+120-(net_input_size/2),
                         time=t3)
 
             if((bounding_boxes[i][2]-bounding_boxes[i][0]<=net_input_size/2)
