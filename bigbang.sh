@@ -71,7 +71,7 @@ aws s3 sync functions/ s3://$1/functions
 # create the cloud formation stack
 aws cloudformation \
     create-stack \
-    --stack-name "PastaDemoCFN" \
+    --stack-name "PastaDemoCFN"$1 \
     --template-body file://pasta_demo_cfn.yml \
     --parameters ParameterKey=S3BucketName,ParameterValue=$1 \
     ParameterKey=CoreName,ParameterValue=$2 \
@@ -81,31 +81,31 @@ aws cloudformation \
 # wait the stack create
 aws cloudformation wait \
     stack-create-complete \
-    --stack-name "PastaDemoCFN"
+    --stack-name "PastaDemoCFN"$1
 
 # get the output
 aws cloudformation \
     describe-stacks \
-    --stack-name "PastaDemoCFN" \
+    --stack-name "PastaDemoCFN"$1 \
     --output text
 
 # generate the .tar.gz
 mkdir certs
 mkdir config
 
-certificatePem=$(aws cloudformation describe-stacks --stack-name "PastaDemoCFN" \
+certificatePem=$(aws cloudformation describe-stacks --stack-name "PastaDemoCFN"$1 \
     --query 'Stacks[0].Outputs[?OutputKey==`CertificatePem`].OutputValue' \
     --output text)
 
-certificatePrivateKey=$(aws cloudformation describe-stacks --stack-name "PastaDemoCFN" \
+certificatePrivateKey=$(aws cloudformation describe-stacks --stack-name "PastaDemoCFN"$1 \
     --query 'Stacks[0].Outputs[?OutputKey==`CertificatePrivateKey`].OutputValue' \
     --output text)
 
-ConfigJson=$(aws cloudformation describe-stacks --stack-name "PastaDemoCFN" \
+ConfigJson=$(aws cloudformation describe-stacks --stack-name "PastaDemoCFN"$1 \
     --query 'Stacks[0].Outputs[?OutputKey==`ConfigJson`].OutputValue' \
     --output text)
 
-iotEndpoint=$(aws cloudformation describe-stacks --stack-name "PastaDemoCFN" \
+iotEndpoint=$(aws cloudformation describe-stacks --stack-name "PastaDemoCFN"$1 \
     --query 'Stacks[0].Outputs[?OutputKey==`IoTEndpoint`].OutputValue' \
     --output text)
 
