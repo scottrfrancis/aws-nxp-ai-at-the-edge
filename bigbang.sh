@@ -119,3 +119,10 @@ mv pastaDemo-certs.tar.gz certs/
 mv certs/cert.pem /greengrass/certs/
 mv certs/cert.key /greengrass/certs/
 mv config/config.json /greengrass/config/
+
+#update the iotendpoint
+cd /aws-nxp-ai-at-the-edge-cloud-dashboard
+
+echo '// eslint-disable-next-line import/prefer-default-export
+export const region = "us-west-2"
+export const iotEndpoint = "'$iotEndpoint'"' > src/shared/constants/aws.js
