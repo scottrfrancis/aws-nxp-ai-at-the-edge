@@ -1,7 +1,11 @@
 #!/bin/bash
 
+PROGFILE=/progress.txt
+
 mkdir ~/.aws
 cd ~/.aws
+
+echo "0" > ${PROGFILE}
 
 # add the credentias
 echo '[default]
@@ -22,8 +26,12 @@ echo '{
   "awsRegion": "us-west-2"
 }' > appConfig.json
 
+echo "10" > ${PROGFILE}
+
 yarn deploy
+echo "50" > ${PROGFILE}
 yarn update
+echo "60" > ${PROGFILE}
 
 # run the script
 export PATH=$PATH:/root/.local/bin
@@ -132,6 +140,7 @@ def function_handler(event, context):
 
 # update the dynamo table name
 tableName=$(aws dynamodb list-tables --output=text | grep -o 'PastaDemoCFN.*')
+echo "65" > ${PROGFILE}
 
 echo '#
 # Copyright 2019 Toradex AG. or its affiliates. All Rights Reserved.
