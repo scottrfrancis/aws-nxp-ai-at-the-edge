@@ -20,12 +20,6 @@ output=json' > config
 # dashboard big bang
 cd /aws-nxp-ai-at-the-edge-cloud-dashboard
 
-echo '{
-  "name": "PastaDemoCFN",
-  "awsAdminProfile": "default",
-  "awsRegion": "us-west-2"
-}' > appConfig.json
-
 echo "10" > ${PROGFILE}
 
 yarn deploy

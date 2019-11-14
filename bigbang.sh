@@ -1,5 +1,6 @@
 #!/bin/bash
 
+export PATH=$PATH:/root/.local/bin
 PROGFILE=/progress.txt
 
 ###
