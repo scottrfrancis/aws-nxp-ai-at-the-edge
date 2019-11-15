@@ -137,6 +137,17 @@ mv certs/cert.pem /greengrass/certs/
 mv certs/cert.key /greengrass/certs/
 mv config/config.json /greengrass/config/
 
+# deploy to greengrass core
+ggGroups=$(aws greengrass list-groups)
+ggMyGroup=$(echo $ggGroups | jshon -e Groups -a -e Name -u -p -e Id -u -p \
+    -e LatestVersion -u | grep -A 2 ${2} | grep -v ${2})
+ggId=$(echo $ggMyGroup | cut -d " " -f1)
+ggLatestVersion=$(echo $ggMyGroup | cut -d " " -f2)
+aws greengrass create-deployment \
+    --deployment-type NewDeployment \
+    --group-id "$ggId" \
+    --group-version-id "$ggLatestVersion"
+
 #update the iotendpoint
 cd /aws-nxp-ai-at-the-edge-cloud-dashboard
 
