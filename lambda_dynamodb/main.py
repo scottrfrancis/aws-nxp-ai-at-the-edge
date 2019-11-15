@@ -18,16 +18,10 @@ from decimal import Decimal
 
 pp = pprint.PrettyPrinter(indent=4)
 
-shadowTopic = {
-	"6438725" : "apalis-imx8-cb-brazil_Core",
-	"6494620": "colibri_imx6_leo_Core"
-}
-
-#shadowTopic = "$aws/things/colibri_imx6_leo_Core/shadow/update"
-
 dynamodb = boto3.resource('dynamodb', region_name='us-west-2')
-#tableName = "PastaDemo"
-tableName = "awsPastaDemoDev-awsPastaDemoDevApiDynamoDbTable-126ZC54I1FJDS"
+
+# Edit this with the actual table value from cloudformation
+tableName = "PastaDemoPlaceholder"
 
 # Create the dynamo db table if needed
 try:
