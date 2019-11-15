@@ -21,7 +21,8 @@ output=json' > config
 cd /aws-nxp-ai-at-the-edge-cloud-dashboard
 
 # Change defualt demo name. Use unique name appending seconds since epoch
-sed -i "s/boardName/pastaDemo$(date +%s)/g" appConfig.json
+demoName=pastaDemo$(date +%s)
+sed -i "s/boardName/pastaDemo${demoName}/g" appConfig.json
 
 echo "10" > ${PROGFILE}
 
@@ -38,7 +39,7 @@ cd /aws-nxp-ai-at-the-edge
 sed -i "s/coreplaceholder/${v}_Core/g" lambda_coreshadow/main.py
 
 # update the dynamo table name with Cloudformation specific variable
-tableName=$(aws dynamodb list-tables --output=text | grep -o 'PastaDemoCFN.*')
+tableName=$(aws dynamodb list-tables --output=text | grep -o "\w*${demoName}.*")
 sed -i "s/PastaDemoPlaceholder/${tableName}/g" lambda_dynamodb/main.py
 echo "65" > ${PROGFILE}
 
