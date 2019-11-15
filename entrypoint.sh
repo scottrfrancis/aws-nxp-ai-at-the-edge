@@ -36,7 +36,7 @@ export PATH=$PATH:/root/.local/bin
 cd /aws-nxp-ai-at-the-edge
 
 # update the core shadow lambda with Cloudformation specific variable
-sed -i "s/coreplaceholder/${v}_Core/g" lambda_coreshadow/main.py
+sed -i "s/coreplaceholder/${2}_Core/g" lambda_coreshadow/main.py
 
 # update the dynamo table name with Cloudformation specific variable
 tableName=$(aws dynamodb list-tables --output=text | grep -o "\w*${demoName}.*")
