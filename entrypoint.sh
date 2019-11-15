@@ -20,6 +20,9 @@ output=json' > config
 # dashboard big bang
 cd /aws-nxp-ai-at-the-edge-cloud-dashboard
 
+# Change defualt demo name. Use unique name appending seconds since epoch
+sed -i "s/boardName/pastaDemo$(date +%s)/g" appConfig.json
+
 echo "10" > ${PROGFILE}
 
 yarn deploy
