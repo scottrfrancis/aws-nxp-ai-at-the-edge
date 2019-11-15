@@ -8,13 +8,8 @@ from coreShadow import CoreShadow
 
 import json
 
-shadowThing = {
-	"6438725" : "apalis-imx8-cb-brazil_Core",
-	"6494620": "colibri_imx6_leo_Core",
-	"6494595": "apalis-imx8-cb-seattle_Core",
-	"6494612": "apalis-imx8-cb-milan_Core"
-}
-#shadowThing = "colibri_imx6_leo_Core"
+# Edit this with the actual core value from cloudformation
+shadowThing = "coreplaceholder"
 
 # Creating a greengrass core sdk client
 client = greengrasssdk.client('iot-data')
@@ -94,7 +89,7 @@ def function_handler(event, context):
 			#print("Data buffer filled, sending updated device shadow!")
 			#print(str(shadowPayload))
 			res = client.update_thing_shadow(
-				thingName = shadowThing[serial],
+				thingName = shadowThing,
 				payload = json.dumps(shadowPayload)
 			) # res is not being checked for success
 			ready_reset()
