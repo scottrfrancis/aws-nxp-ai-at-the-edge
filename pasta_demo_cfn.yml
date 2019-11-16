@@ -513,21 +513,9 @@ Resources:
             Principal:
               Service: greengrass.amazonaws.com
             Action: sts:AssumeRole
-      Policies:
-        - PolicyName: root
-          PolicyDocument:
-            Version: "2012-10-17"
-            Statement:
-              - Effect: Allow
-                Action:
-                  - logs:CreateLogGroup
-                  - logs:CreateLogStream
-                  - logs:PutLogEvents
-                Resource: arn:aws:logs:*:*:*
-              - Effect: Allow
-                Action:
-                  - iot:*
-                Resource: "*"
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess
+        - arn:aws:iam::aws:policy/service-role/AWSGreengrassResourceAccessRolePolicy
 
 Outputs:
   IoTEndpoint:
