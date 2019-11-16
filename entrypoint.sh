@@ -1,6 +1,9 @@
 #!/bin/bash
 
 PROGFILE=/progress.txt
+WEBDASHB=/webdashboards.txt
+
+export PATH=$PATH:/root/.local/bin
 
 mkdir ~/.aws
 cd ~/.aws
@@ -31,8 +34,13 @@ echo "40" > ${PROGFILE}
 yarn update
 echo "60" > ${PROGFILE}
 
+# get the web dashboard URL
+CFR=$(aws cloudfront list-distributions --no-paginate)
+echo $CFR | jshon -e DistributionList -e Items -a -e DomainName -u -p \
+	-e DefaultCacheBehavior -e TargetOriginId -u | grep -B 1 pastademo | grep \
+	-vE 'pastademo|^--$' >> ${WEBDASHB}
+
 # run the script
-export PATH=$PATH:/root/.local/bin
 cd /aws-nxp-ai-at-the-edge
 
 # update the core shadow lambda with Cloudformation specific variable
