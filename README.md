@@ -1,8 +1,9 @@
 # aws-nxp-ai-at-the-edge #
 
 Lambdas, containers, inference and utils for the collaborative demo with Amazon
-and NXP to plug it to AWS services such as AWS IoT Greengrass and AWS SageMaker
-Neo.
+and NXP to plug a [Toradex](https://www.toradex.com/) Computer on Module using
+the embedded Linux [Torizon](https://www.toradex.com/operating-systems/torizon)
+platform to AWS services such as AWS IoT Greengrass and AWS SageMaker Neo.
 
 # How to Use #
 
