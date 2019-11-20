@@ -2,6 +2,7 @@
 
 export PATH=$PATH:/root/.local/bin
 PROGFILE=/progress.txt
+STACKNAME="PastaDemoCFN"$1
 
 ###
 # god needs the parameters
@@ -86,7 +87,7 @@ echo "85" > ${PROGFILE}
 # create the cloud formation stack
 aws cloudformation \
     create-stack \
-    --stack-name "PastaDemoCFN"$1 \
+    --stack-name $STACKNAME \
     --template-body file://pasta_demo_cfn.yml \
     --parameters ParameterKey=S3BucketName,ParameterValue=$1 \
     ParameterKey=CoreName,ParameterValue=$2 \
@@ -96,33 +97,33 @@ aws cloudformation \
 # wait the stack create
 aws cloudformation wait \
     stack-create-complete \
-    --stack-name "PastaDemoCFN"$1
+    --stack-name $STACKNAME
 
 echo "90" > ${PROGFILE}
 
 # get the output
 aws cloudformation \
     describe-stacks \
-    --stack-name "PastaDemoCFN"$1 \
+    --stack-name $STACKNAME \
     --output text
 
 # generate the .tar.gz
 mkdir certs
 mkdir config
 
-certificatePem=$(aws cloudformation describe-stacks --stack-name "PastaDemoCFN"$1 \
+certificatePem=$(aws cloudformation describe-stacks --stack-name $STACKNAME \
     --query 'Stacks[0].Outputs[?OutputKey==`CertificatePem`].OutputValue' \
     --output text)
 
-certificatePrivateKey=$(aws cloudformation describe-stacks --stack-name "PastaDemoCFN"$1 \
+certificatePrivateKey=$(aws cloudformation describe-stacks --stack-name $STACKNAME \
     --query 'Stacks[0].Outputs[?OutputKey==`CertificatePrivateKey`].OutputValue' \
     --output text)
 
-ConfigJson=$(aws cloudformation describe-stacks --stack-name "PastaDemoCFN"$1 \
+ConfigJson=$(aws cloudformation describe-stacks --stack-name $STACKNAME \
     --query 'Stacks[0].Outputs[?OutputKey==`ConfigJson`].OutputValue' \
     --output text)
 
-iotEndpoint=$(aws cloudformation describe-stacks --stack-name "PastaDemoCFN"$1 \
+iotEndpoint=$(aws cloudformation describe-stacks --stack-name $STACKNAME \
     --query 'Stacks[0].Outputs[?OutputKey==`IoTEndpoint`].OutputValue' \
     --output text)
 
@@ -136,6 +137,12 @@ mv pastaDemo-certs.tar.gz certs/
 mv certs/cert.pem /greengrass/certs/
 mv certs/cert.key /greengrass/certs/
 mv config/config.json /greengrass/config/
+
+# associate service role to account
+# I think this could be done with Cloudformation, not exactly sure how
+roles=$(aws iam list-roles)
+roleArn=$(echo $roles | jshon -e Roles -a -e Arn -u | grep -E "$STACKNAME.*Greengrass")
+aws greengrass associate-service-role-to-account --role-arn $roleArn
 
 # deploy to greengrass core
 ggGroups=$(aws greengrass list-groups)
