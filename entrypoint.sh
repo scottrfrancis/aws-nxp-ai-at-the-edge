@@ -30,7 +30,7 @@ cd /aws-nxp-ai-at-the-edge-cloud-dashboard
 demoName=pastaDemo$(date +%s)
 cat appConfig.json | jshon -s $(echo $demoName) -i name > appConfig.json
 # Use default AWS CLI profile
-cat appConfig.json | jshon -s default -i awsAdminProfile > appConfig.json
+cat appConfig.json | jshon -s $(echo default) -i awsAdminProfile > appConfig.json
 
 echo "10" > ${PROGFILE}
 
