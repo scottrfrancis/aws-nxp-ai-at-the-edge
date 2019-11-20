@@ -2,7 +2,7 @@
 
 PROGFILE=/progress.txt
 WEBDASHB=/webdashboards.txt
-AWSPROFILE=pastaDemo
+AWSPROFILE=default
 AWSID=$3
 AWSSECRET=$4
 
@@ -29,6 +29,8 @@ cd /aws-nxp-ai-at-the-edge-cloud-dashboard
 # Change defualt demo name. Use unique name appending seconds since epoch
 demoName=pastaDemo$(date +%s)
 cat appConfig.json | jshon -s $(echo $demoName) -i name > appConfig.json
+# Use default AWS CLI profile
+cat appConfig.json | jshon -s default -i awsAdminProfile > appConfig.json
 
 echo "10" > ${PROGFILE}
 
