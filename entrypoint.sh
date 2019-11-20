@@ -2,6 +2,9 @@
 
 PROGFILE=/progress.txt
 WEBDASHB=/webdashboards.txt
+AWSPROFILE=pastaDemo
+AWSID=$3
+AWSSECRET=$4
 
 export PATH=$PATH:/root/.local/bin
 
@@ -11,12 +14,12 @@ cd ~/.aws
 echo "0" > ${PROGFILE}
 
 # add the credentias
-echo '[default]
-aws_access_key_id='$3'
-aws_secret_access_key='$4 > credentials
+echo '['$AWSPROFILE']
+aws_access_key_id='$AWSID'
+aws_secret_access_key='$AWSSECRET > credentials
 
 # add the config
-echo '[default]
+echo '['$AWSPROFILE']
 region=us-west-2
 output=json' > config
 
@@ -25,7 +28,7 @@ cd /aws-nxp-ai-at-the-edge-cloud-dashboard
 
 # Change defualt demo name. Use unique name appending seconds since epoch
 demoName=pastaDemo$(date +%s)
-sed -i "s/boardName/pastaDemo${demoName}/g" appConfig.json
+cat appConfig.json | jshon -s $(echo $demoName) -i name > appConfig.json
 
 echo "10" > ${PROGFILE}
 
