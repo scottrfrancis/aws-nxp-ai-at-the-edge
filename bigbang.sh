@@ -19,7 +19,7 @@ APP=/app
 PROGFILE=/progress.txt
 UNIQUEHASH=$1
 GGNAME=$2
-STACKNAME="PastaDemoCFN"$UNIQUEHASH
+STACKNAME="pasta-demo-cfn-"$UNIQUEHASH
 
 echo "Packaging lambdas as ZIP and uploading to S3 bucket"
 
