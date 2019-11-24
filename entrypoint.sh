@@ -1,5 +1,6 @@
 #!/bin/bash
 
+APP=/app
 PROGFILE=/progress.txt
 WEBDASHB=/webdashboards.txt
 AWSPROFILE=default
@@ -28,7 +29,7 @@ region=us-west-2
 output=json' > config
 
 # dashboard big bang
-cd /aws-nxp-ai-at-the-edge-cloud-dashboard
+cd $APP/aws-nxp-ai-at-the-edge-cloud-dashboard
 
 # Change defualt demo name. Use unique name appending seconds since epoch
 demoName=pastaDemo$(date +%s)
@@ -45,7 +46,7 @@ echo "10" > ${PROGFILE}
 
 yarn deploy
 echo "40" > ${PROGFILE}
-yarn update
+yarn update # It is mandatory even for deployment from scratch
 echo "60" > ${PROGFILE}
 
 # get the web dashboard URL
@@ -56,7 +57,7 @@ echo $CFR | jshon -e DistributionList -e Items -a -e DomainName -u -p \
 echo "Web dashboard available at: $(cat ${WEBDASHB})"
 
 # run the script
-cd /aws-nxp-ai-at-the-edge
+cd $APP/aws-nxp-ai-at-the-edge
 
 # update the core shadow lambda with Cloudformation specific variable
 sed -i "s/coreplaceholder/${GGNAME}_Core/g" lambda_coreshadow/main.py

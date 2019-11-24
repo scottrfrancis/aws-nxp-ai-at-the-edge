@@ -15,6 +15,7 @@ fi
 ###
 
 export PATH=$PATH:/root/.local/bin
+APP=/app
 PROGFILE=/progress.txt
 UNIQUEHASH=$1
 GGNAME=$2
@@ -177,7 +178,7 @@ aws greengrass create-deployment \
 #update the iotendpoint
 echo "Updating the IoT endpoint from the web dashboard. Takes a few minutes..."
 
-cd /aws-nxp-ai-at-the-edge-cloud-dashboard
+cd $APP/aws-nxp-ai-at-the-edge-cloud-dashboard
 
 echo "95" > ${PROGFILE}
 
