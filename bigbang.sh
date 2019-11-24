@@ -160,7 +160,16 @@ echo "Associating service role to account"
 # I think this could be done with Cloudformation, not exactly sure how
 roles=$(aws iam list-roles)
 roleArn=$(echo $roles | jshon -e Roles -a -e Arn -u | grep -E "$STACKNAME.*Greengrass")
-aws greengrass associate-service-role-to-account --role-arn $roleArn
+if [ -z "$roleArn" ]; then
+    echo "Service Role retrieved is empty"
+else
+    echo "roleArn: $roleArn"
+    echo "$roleArn"
+    aws greengrass associate-service-role-to-account --role-arn "$roleArn"
+fi
+
+[ "$?" == "0" ] && echo "Success on service role association:" || echo "Service role association failed:"
+aws greengrass get-service-role-for-account
 
 # deploy to greengrass core
 echo "Starting greengrass core deployment - will be queued until the device connects to Cloud"
@@ -170,6 +179,8 @@ ggMyGroup=$(echo $ggGroups | jshon -e Groups -a -e Name -u -p -e Id -u -p \
     -e LatestVersion -u | grep -A 2 ${GGNAME} | grep -v ${GGNAME})
 ggId=$(echo $ggMyGroup | cut -d " " -f1)
 ggLatestVersion=$(echo $ggMyGroup | cut -d " " -f2)
+echo "Greengrass group ID: $ggId"
+echo "Greengrass group latest version ID: $ddLatestVersion"
 aws greengrass create-deployment \
     --deployment-type NewDeployment \
     --group-id "$ggId" \
