@@ -144,11 +144,11 @@ roleArn=$(aws cloudformation describe-stacks --stack-name $STACKNAME \
     --query 'Stacks[0].Outputs[?OutputKey==`RoleARN`].OutputValue' \
     --output text)
 
-groupId=$(aws cloudformation describe-stacks --stack-name $STACKNAME \
+ggId=$(aws cloudformation describe-stacks --stack-name $STACKNAME \
     --query 'Stacks[0].Outputs[?OutputKey==`GroupId`].OutputValue' \
     --output text)
 
-groupLatestVersion=$(aws cloudformation describe-stacks --stack-name $STACKNAME \
+ggLatestVersion=$(aws cloudformation describe-stacks --stack-name $STACKNAME \
     --query 'Stacks[0].Outputs[?OutputKey==`GroupLatestVersion`].OutputValue' \
     --output text)
 
@@ -185,13 +185,8 @@ aws greengrass get-service-role-for-account
 # deploy to greengrass core
 echo "Starting greengrass core deployment - will be queued until the device connects to Cloud"
 
-ggGroups=$(aws greengrass list-groups)
-ggMyGroup=$(echo $ggGroups | jshon -e Groups -a -e Name -u -p -e Id -u -p \
-    -e LatestVersion -u | grep -A 2 ${GGNAME} | grep -v ${GGNAME})
-ggId=$(echo $ggMyGroup | cut -d " " -f1)
-ggLatestVersion=$(echo $ggMyGroup | cut -d " " -f2)
 echo "Greengrass group ID: $ggId"
-echo "Greengrass group latest version ID: $ddLatestVersion"
+echo "Greengrass group latest version ID: $ggLatestVersion"
 aws greengrass create-deployment \
     --deployment-type NewDeployment \
     --group-id "$ggId" \
