@@ -140,6 +140,18 @@ iotEndpoint=$(aws cloudformation describe-stacks --stack-name $STACKNAME \
     --query 'Stacks[0].Outputs[?OutputKey==`IoTEndpoint`].OutputValue' \
     --output text)
 
+roleArn=$(aws cloudformation describe-stacks --stack-name $STACKNAME \
+    --query 'Stacks[0].Outputs[?OutputKey==`RoleARN`].OutputValue' \
+    --output text)
+
+groupId=$(aws cloudformation describe-stacks --stack-name $STACKNAME \
+    --query 'Stacks[0].Outputs[?OutputKey==`GroupId`].OutputValue' \
+    --output text)
+
+groupLatestVersion=$(aws cloudformation describe-stacks --stack-name $STACKNAME \
+    --query 'Stacks[0].Outputs[?OutputKey==`GroupLatestVersion`].OutputValue' \
+    --output text)
+
 echo -n "${certificatePem}" > certs/cert.pem
 echo -n "${certificatePrivateKey}" > certs/cert.key
 echo -n "${ConfigJson}" > config/config.json
@@ -159,13 +171,12 @@ echo "Associating service role to account"
 # associate service role to account
 # I think this could be done with Cloudformation, not exactly sure how
 roles=$(aws iam list-roles)
-roleArn=$(echo $roles | jshon -e Roles -a -e Arn -u | grep -E "$STACKNAME.*Greengrass")
-if [ -z "$roleArn" ]; then
+roleArnOk=$(echo $roles | jshon -e Roles -a -e Arn -u | grep -E "$STACKNAME.*Greengrass")
+if [ -z "$roleArnOk" ]; then
     echo "Service Role retrieved is empty"
-else
-    echo "roleArn: $roleArn"
-    echo "$roleArn"
     aws greengrass associate-service-role-to-account --role-arn "$roleArn"
+else
+    echo "Role exists"
 fi
 
 [ "$?" == "0" ] && echo "Success on service role association:" || echo "Service role association failed:"
