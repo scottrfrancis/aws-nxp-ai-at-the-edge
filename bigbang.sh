@@ -185,6 +185,9 @@ aws greengrass get-service-role-for-account
 # deploy to greengrass core
 echo "Starting greengrass core deployment - will be queued until the device connects to Cloud"
 
+# get only version from the ggLatestVersion
+ggLatestVersion=$(echo $ggLatestVersion | grep -oP '(?<=versions/).*')
+
 echo "Greengrass group ID: $ggId"
 echo "Greengrass group latest version ID: $ggLatestVersion"
 aws greengrass create-deployment \
