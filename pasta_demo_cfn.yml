@@ -526,7 +526,7 @@ Outputs:
     Value: !GetAtt GreengrassGroup.Id
   GroupLatestVersion:
     Description: "GG Group Latest Version"
-    Value: !GetAtt GreengrassGroup.LatestVersion
+    Value: !GetAtt GreengrassGroup.LatestVersionArn
   IoTEndpoint:
     Description: "IoT Endpoint"
     Value: !GetAtt IoTThing.iotEndpoint
