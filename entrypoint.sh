@@ -13,6 +13,38 @@ export PATH=$PATH:/root/.local/bin
 
 echo "Starting the provisioning of the AWS and Toradex AI at the Edge Demo"
 
+# cleanup
+if [ -d "~/.aws" ]
+then
+	echo "AWS folder exist"
+	echo "Deleting ..."
+	rm -rf ~/.aws
+fi
+
+if [ -d "$PROGFILE" ]
+then
+	echo "$PROGFILE folder exist"
+	echo "Deleting ..."
+	rm -rf $PROGFILE
+fi
+
+if [ -d "$WEBDASHB" ]
+then
+	echo "$WEBDASHB folder exist"
+	echo "Deleting ..."
+	rm -rf $WEBDASHB
+fi
+
+# clean up the repos
+cd $APP/aws-nxp-ai-at-the-edge-cloud-dashboard
+git reset --hard HEAD
+cd -
+
+cd $APP/aws-nxp-ai-at-the-edge
+git reset --hard HEAD
+cd -
+# end cleanup
+
 mkdir ~/.aws
 cd ~/.aws
 
