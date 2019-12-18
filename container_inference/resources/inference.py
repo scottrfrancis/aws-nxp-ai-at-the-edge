@@ -215,9 +215,18 @@ def main():
     lastTime = 0.0
     t_frame_1 = 0
 
+    try:
+        f = open("/dev/video4")
+        video_device="/dev/video4"
+        f.close()
+    except FileNotFoundError:
+        video_device="/dev/video0"
+
+    print('opening video ',video_device)
+
     with gst_pipeline.VideoOverlayPipeline(
             "Pasta demo",
-            "/dev/video4") as pipeline:
+            video_device) as pipeline:
 
         while pipeline.running:
             # Get a frame of video from the pipeline.
