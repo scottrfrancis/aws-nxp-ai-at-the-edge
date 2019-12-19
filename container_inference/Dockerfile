@@ -23,10 +23,15 @@ RUN git clone --recursive https://github.com/neo-ai/neo-ai-dlr.git
 RUN cd neo-ai-dlr;mkdir build;cd build;cmake ..;make -j`nproc`
 RUN cd neo-ai-dlr/python;python3 setup.py install --user
 
-COPY resources .
+RUN mkdir common_util
+COPY resources/common_util common_util
+
+RUN mkdir model
+COPY resources/model model
+
+#COPY resources/inference.py .
+COPY v2 .
 
 ENTRYPOINT python3 inference.py
 
-#CMD gst-launch-1.0 v4l2src device=/dev/video4 ! videoconvert ! videoscale ! v4l2sink device=/dev/video14
-#CMD gst-launch-1.0 v4l2src device=/dev/video4 ! videoconvert ! videoscale ! xvimagesink
-#ENTRYPOINT cd v1;python3 inference.py
+#ENTRYPOINT gst-launch-1.0 v4l2src device=/dev/video4 ! "video/x-raw, width=320, height=240" ! videoconvert ! videoscale ! v4l2sink device=/dev/video14 sync=false
