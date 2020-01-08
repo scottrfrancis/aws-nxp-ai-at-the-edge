@@ -525,6 +525,15 @@ Resources:
         - arn:aws:iam::aws:policy/service-role/AWSGreengrassResourceAccessRolePolicy
 
 Outputs:
+  RoleARN:
+    Description: "GG Group Role ARN"
+    Value: !GetAtt GreengrassResourceRole.Arn
+  GroupId:
+    Description: "GG Group ID"
+    Value: !GetAtt GreengrassGroup.Id
+  GroupLatestVersion:
+    Description: "GG Group Latest Version"
+    Value: !GetAtt GreengrassGroup.LatestVersionArn
   IoTEndpoint:
     Description: "IoT Endpoint"
     Value: !GetAtt IoTThing.iotEndpoint

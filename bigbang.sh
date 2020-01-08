@@ -1,22 +1,27 @@
 #!/bin/bash
 
-export PATH=$PATH:/root/.local/bin
-PROGFILE=/progress.txt
-STACKNAME="PastaDemoCFN"$1
-
 ###
 # god needs the parameters
 ###
 if [ -z "$1" ]
   then
-    echo "No argument supplied"
-    echo "Please give bucket a name: ./bigbang.sh mybucket"
+    echo "No unique hash supplied"
+    echo "Please give bucket an unique name: ./bigbang.sh mybucket-unique-hash"
     exit
 fi
 
 ###
 # said god let there be light and there was light
 ###
+
+export PATH=$PATH:/root/.local/bin
+APP=/app
+PROGFILE=/progress.txt
+UNIQUEHASH=$1
+GGNAME=$2
+STACKNAME="pasta-demo-cfn-"$UNIQUEHASH
+
+echo "Packaging lambdas as ZIP and uploading to S3 bucket"
 
 # create the storage for lambda zips
 mkdir functions
@@ -72,25 +77,30 @@ zip -rq ${LAMBDA_ALIAS}.zip *
 mv ${LAMBDA_ALIAS}.zip ../functions
 cd -
 
+echo "Lambdas packages. Uploading to S3..."
+
 echo "79" > ${PROGFILE}
 
 # create the bucket to send zips
-aws s3 mb s3://$1
+aws s3 mb s3://$STACKNAME
 
 echo "83" > ${PROGFILE}
 
 # send zips
-aws s3 sync functions/ s3://$1/functions
+aws s3 sync functions/ s3://$STACKNAME/functions
+
+echo "Lambdas uploaded to S3"
 
 echo "85" > ${PROGFILE}
 
 # create the cloud formation stack
+echo "Creating Greengrass Cloudformation Stack"
 aws cloudformation \
     create-stack \
     --stack-name $STACKNAME \
     --template-body file://pasta_demo_cfn.yml \
-    --parameters ParameterKey=S3BucketName,ParameterValue=$1 \
-    ParameterKey=CoreName,ParameterValue=$2 \
+    --parameters ParameterKey=S3BucketName,ParameterValue=$STACKNAME \
+    ParameterKey=CoreName,ParameterValue=$GGNAME \
     --region "us-west-2" \
     --capabilities CAPABILITY_IAM
 
@@ -98,6 +108,8 @@ aws cloudformation \
 aws cloudformation wait \
     stack-create-complete \
     --stack-name $STACKNAME
+
+echo "Greengrass Cloudformation Stack created"
 
 echo "90" > ${PROGFILE}
 
@@ -108,6 +120,7 @@ aws cloudformation \
     --output text
 
 # generate the .tar.gz
+echo "Creating Core device certificates and installing on the board"
 mkdir certs
 mkdir config
 
@@ -127,9 +140,23 @@ iotEndpoint=$(aws cloudformation describe-stacks --stack-name $STACKNAME \
     --query 'Stacks[0].Outputs[?OutputKey==`IoTEndpoint`].OutputValue' \
     --output text)
 
+roleArn=$(aws cloudformation describe-stacks --stack-name $STACKNAME \
+    --query 'Stacks[0].Outputs[?OutputKey==`RoleARN`].OutputValue' \
+    --output text)
+
+ggId=$(aws cloudformation describe-stacks --stack-name $STACKNAME \
+    --query 'Stacks[0].Outputs[?OutputKey==`GroupId`].OutputValue' \
+    --output text)
+
+ggLatestVersion=$(aws cloudformation describe-stacks --stack-name $STACKNAME \
+    --query 'Stacks[0].Outputs[?OutputKey==`GroupLatestVersion`].OutputValue' \
+    --output text)
+
 echo -n "${certificatePem}" > certs/cert.pem
 echo -n "${certificatePrivateKey}" > certs/cert.key
 echo -n "${ConfigJson}" > config/config.json
+
+echo "Certificates created"
 
 tar -czvf pastaDemo-certs.tar.gz certs/ config/
 mv pastaDemo-certs.tar.gz certs/
@@ -137,6 +164,9 @@ mv pastaDemo-certs.tar.gz certs/
 mv certs/cert.pem /greengrass/certs/
 mv certs/cert.key /greengrass/certs/
 mv config/config.json /greengrass/config/
+
+echo "Certificates installed"
+echo "Associating service role to account"
 
 # associate service role to account
 # I think this could be done with Cloudformation, not exactly sure how
@@ -146,18 +176,22 @@ roleArn=$(aws cloudformation describe-stacks --stack-name GGRole | jshon -e Stac
 aws greengrass associate-service-role-to-account --role-arn $roleArn
 
 # deploy to greengrass core
-ggGroups=$(aws greengrass list-groups)
-ggMyGroup=$(echo $ggGroups | jshon -e Groups -a -e Name -u -p -e Id -u -p \
-    -e LatestVersion -u | grep -A 2 ${2} | grep -v ${2})
-ggId=$(echo $ggMyGroup | cut -d " " -f1)
-ggLatestVersion=$(echo $ggMyGroup | cut -d " " -f2)
+echo "Starting greengrass core deployment - will be queued until the device connects to Cloud"
+
+# get only version from the ggLatestVersion
+ggLatestVersion=$(echo $ggLatestVersion | grep -oP '(?<=versions/).*')
+
+echo "Greengrass group ID: $ggId"
+echo "Greengrass group latest version ID: $ggLatestVersion"
 aws greengrass create-deployment \
     --deployment-type NewDeployment \
     --group-id "$ggId" \
     --group-version-id "$ggLatestVersion"
 
 #update the iotendpoint
-cd /aws-nxp-ai-at-the-edge-cloud-dashboard
+echo "Updating the IoT endpoint from the web dashboard. Takes a few minutes..."
+
+cd $APP/aws-nxp-ai-at-the-edge-cloud-dashboard
 
 echo "95" > ${PROGFILE}
 
@@ -166,4 +200,5 @@ export const region = "us-west-2"
 export const iotEndpoint = "'$iotEndpoint'"' > src/shared/constants/aws.js
 
 yarn update
+echo "Deployment process completed! :)"
 echo "100" > ${PROGFILE}
