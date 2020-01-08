@@ -199,6 +199,8 @@ Resources:
                   RunAs:
                     Uid: '1'
                     Gid: '10'
+
+          # delete this one         
           - Id: "DynamoDB"
             FunctionArn: !Ref GGDynamoDBFunctionVersion
             FunctionConfiguration:
@@ -216,6 +218,7 @@ Resources:
                   RunAs:
                     Uid: '1'
                     Gid: '10'
+
           - Id: "SystemControl"
             FunctionArn: !Ref GGSystemControlFunctionVersion
             FunctionConfiguration:
@@ -256,6 +259,8 @@ Resources:
     Properties:
       Name: SubscriptionDefinition
       InitialVersion:
+
+        # change this table
         Subscriptions:
           - Id: Subscription2
             Source: !Ref GGCoreShadowFunctionVersion
@@ -387,6 +392,7 @@ Resources:
         S3Bucket: !Sub "${S3BucketName}"
         S3Key: functions/cshadow.zip
 
+  # delete this
   GGDynamoDBFunction:
     Type: AWS::Lambda::Function
     Properties:
@@ -436,6 +442,7 @@ Resources:
     Properties:
       FunctionName : !GetAtt GGCoreShadowFunction.Arn
 
+  # delete
   GGDynamoDBFunctionVersion:
     Type: AWS::Lambda::Version
     Properties:
@@ -558,3 +565,5 @@ Outputs:
           "caPath" : "file:///greengrass/certs/root.ca.pem"
         }
       }
+  GreengrassResourceRoleARN:
+    Value: !GetAtt GreengrassResourceRole.Arn

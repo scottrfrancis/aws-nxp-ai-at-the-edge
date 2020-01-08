@@ -140,8 +140,9 @@ mv config/config.json /greengrass/config/
 
 # associate service role to account
 # I think this could be done with Cloudformation, not exactly sure how
-roles=$(aws iam list-roles)
-roleArn=$(echo $roles | jshon -e Roles -a -e Arn -u | grep -E "$STACKNAME.*Greengrass")
+# roles=$(aws iam list-roles)
+# roleArn=$(echo $roles | jshon -e Roles -a -e Arn -u | grep -E "$STACKNAME.*Greengrass")
+roleArn=$(aws cloudformation describe-stacks --stack-name GGRole | jshon -e Stacks -a -e Outputs -a -e OutputKey -u  -p -e OutputValue -u | grep -A1 "GreengrassResourceRoleARN" | tail -n 1)
 aws greengrass associate-service-role-to-account --role-arn $roleArn
 
 # deploy to greengrass core
