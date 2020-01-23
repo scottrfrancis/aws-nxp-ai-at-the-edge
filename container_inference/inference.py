@@ -10,10 +10,10 @@ import cv2
 from queue import Queue
 import threading
 
-#im_width_out = 640
-#im_height_out = 480
-im_width_out = 2592
-im_height_out = 1944
+im_width_out = 640
+im_height_out = 480
+#im_width_out = 2592
+#im_height_out = 1944
 
 net_input_size= 240
 
@@ -84,6 +84,8 @@ last_inference = inference(0,0,[])
 # Inference
 def pasta_detection(img):
     global last_inference
+    global tbefore
+    global tafter
     #******** INSERT YOUR INFERENCE HERE ********
     img2 = cv2.resize(img, (net_input_size,int(net_input_size/4*3)))#, interpolation = cv2.INTER_NEAREST)
     img2 = cv2.copyMakeBorder(img2,int(net_input_size/8),int(net_input_size/8),0,0,cv2.BORDER_CONSTANT,value=(0,0,0))
@@ -109,10 +111,10 @@ def pasta_detection(img):
     net_input[2,:] = net_input[2:]/blustd
 
     #Run the model
-    t1 = time()
+    tbefore = time()
     outputs = model.run({'data': net_input})
-    t2 = time()
-    last_inference_time = t2-t1
+    tafter = time()
+    last_inference_time = tbefore-tafter
     objects=outputs[0][0]
     scores=outputs[1][0]
     bounding_boxes=outputs[2][0]
@@ -121,7 +123,7 @@ def pasta_detection(img):
     result_set=[]
     #***********END OF FLASK*******
     i = 0
-    while (scores[i]>0.6):
+    while (scores[i]>0.4):
 
         x1=int(bounding_boxes[i][1]*im_width_out/net_input_size)
         y1=int((bounding_boxes[i][0]-net_input_size/8)*im_height_out/(net_input_size*3/4))
@@ -131,7 +133,7 @@ def pasta_detection(img):
         #***********FLASK*******
         this_object=class_names[int(objects[i])]
         this_result = result(score= scores[i],object= this_object,
-            xmin= x1,xmax= x2,ymin= y1,ymax= y2,time=t2)
+            xmin= x1,xmax= x2,ymin= y1,ymax= y2,time=tafter)
         result_set.append(this_result)
         #***********END OF FLASK*******# def signal_handler(signal, frame):
         object_id=int(objects[i])
@@ -143,7 +145,7 @@ def pasta_detection(img):
     cv2.putText(img,"inf. time: %.3fs"%last_inference_time,(3,12), cv2.FONT_HERSHEY_SIMPLEX, 0.4,(255,255,255),1,cv2.LINE_AA)
 
     #***********FLASK*******
-    last_inference = inference(t1,last_inference_time,result_set)
+    last_inference = inference(tbefore,last_inference_time,result_set)
     if(history.full()==False): #FLASK
        history.put(last_inference, block=True, timeout=None)
     #***********END OF FLASK*******
@@ -154,31 +156,25 @@ def pasta_detection(img):
 def get_frame(sink, data):
     global appsource
     global tlast
+    global tbefore
+    global tafter
 
-    t1=time()
+    t0=time()
     sample = sink.emit("pull-sample")
     global_buf = sample.get_buffer()
-    t2=time()
     caps = sample.get_caps()
     im_height_in = caps.get_structure(0).get_value('height')
     im_width_in = caps.get_structure(0).get_value('width')
-
-    t3=time()
     mem = global_buf.get_all_memory()
-    t4=time()
+    t1=time()
     success, arr = mem.map(Gst.MapFlags.READ)
-    if success == True:
-        img = np.ndarray(shape=(im_height_in, im_width_in, 3), \
-        buffer=buffer.extract_dup(0, global_buf.get_size()), \
-        dtype=np.uint8)
-
-        #img = np.ndarray((im_height_in,im_width_in,3),buffer=arr.data,dtype=np.uint8)
-        t5=time()
-        pasta_detection(img)
-        t6=time()
-
+    t2=time()
+    img = np.ndarray((im_height_in,im_width_in,3),buffer=arr.data,dtype=np.uint8)
+    t3=time()
+    pasta_detection(img)
+    t4=time()
     appsource.emit("push-buffer", Gst.Buffer.new_wrapped(img.tobytes()))
-    t7=time()
+    t5=time()
     mem.unmap(arr)
     gc.collect()
 
@@ -188,13 +184,16 @@ def get_frame(sink, data):
         print("first frame")
     tlast=time()
 
-    print("t2=",100*(t2-t1)/(t7-t1),"%")
-    print("t3=",100*(t3-t2)/(t7-t1),"%")
-    print("t4=",100*(t4-t3)/(t7-t1),"%")
-    print("t5=",100*(t5-t4)/(t7-t1),"%")
-    print("t6=",100*(t6-t5)/(t7-t1),"%")
-    print("t7=",100*(t7-t6)/(t7-t1),"%")
-    print("TOTAL=",t7-t1)
+    ttotal = tlast-t0
+    print("t1=",(t1-t0)," - ",100*(t1-t0)/(ttotal),"%")
+    print("t2=",(t2-t1)," - ",100*(t2-t1)/(ttotal),"%")
+    print("t3=",(t3-t2)," - ",100*(t3-t2)/(ttotal),"%")
+    print("t4a=",(tbefore-t3)," - ",100*(tbefore-t3)/(ttotal),"%")
+    print("t4b=",(tafter-tbefore)," - ",100*(tafter-tbefore)/(ttotal),"%")
+    print("t4c=",(t4-tafter)," - ",100*(t4-tafter)/(ttotal),"%")
+    print("t5=",(t5-t4)," - ",100*(t5-t4)/(ttotal),"%")
+    print("t6=",(tlast-t5)," - ",100*(tlast-t5)/(ttotal),"%")
+    print("TOTAL=",ttotal)
 
     return Gst.FlowReturn.OK
 
@@ -211,14 +210,15 @@ def main():
     # Gstreamer Init
     Gst.init(None)
 
-    pipeline1_cmd="v4l2src device=/dev/video0 ! capsfilter caps=video/x-raw,format=RGB ! videoconvert ! \
-        queue ! appsink sync=False name=sink max-buffers=1 drop=True max-buffers=1 \
-        qos=False sync=False emit-signals=True"
+    pipeline1_cmd="v4l2src device=/dev/video0 do-timestamp=True ! queue leaky=downstream ! videoscale n-threads=4 ! \
+        video/x-raw,format=RGB,width="+str(im_width_out)+",height="+str(im_height_out)+" ! \
+        queue leaky=downstream ! appsink name=sink max-buffers=5 \
+        drop=True max-buffers=3 emit-signals=True"
 
     pipeline2_cmd = "appsrc name=appsource1 is-live=True block=True ! \
         video/x-raw,format=RGB,width="+str(im_width_out)+",height="+ \
         str(im_height_out)+",framerate=10/1,interlace-mode=(string)progressive ! \
-        videoconvert ! v4l2sink sync=False device=/dev/video14"
+        videoconvert ! v4l2sink max-lateness=8000000000 device=/dev/video14"
 
     pipeline1 = Gst.parse_launch(pipeline1_cmd)
     appsink = pipeline1.get_by_name('sink')
