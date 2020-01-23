@@ -2,8 +2,7 @@ import gi
 gi.require_version('Gst', '1.0')
 gi.require_version('GstApp', '1.0')
 from gi.repository import GLib, Gst, GstApp
-import sys, os, time, re,signal
-from time import time, sleep
+from time import time
 from dlr import DLRModel
 import numpy as np
 import gc
@@ -11,16 +10,15 @@ import cv2
 from queue import Queue
 import threading
 
-im_width_out = 320
-im_height_out = 240
-#im_width_out = 2592
-#im_height_out = 1944
+#im_width_out = 640
+#im_height_out = 480
+im_width_out = 2592
+im_height_out = 1944
 
 net_input_size= 240
 
 class_names =['shell','elbow','penne','tortellini','farfalle']
 colors=[(0xFF,0x83,0x00),(0xFF,0x66,0x00),(0xFF,0x00,0x00),(0x99,0xFF,0x00),(0x00,0x00,0xFF),(0x00,0xFF,0x00)]
-#colors=[(0x99,0xCC,0x00),(0xFF,0x99,0x00),(0xFF,0x33,0x00),(0x33,0xFF,0x00),(0x99,0x66,0x00),(0xFF,0xFF,0x00),(0x99,0x00,0x00)]
 
 #*************************START FLASK**********************
 history = Queue(1000)
@@ -87,7 +85,10 @@ last_inference = inference(0,0,[])
 def pasta_detection(img):
     global last_inference
     #******** INSERT YOUR INFERENCE HERE ********
-    buf=img.astype('float64')
+    img2 = cv2.resize(img, (net_input_size,int(net_input_size/4*3)))#, interpolation = cv2.INTER_NEAREST)
+    img2 = cv2.copyMakeBorder(img2,int(net_input_size/8),int(net_input_size/8),0,0,cv2.BORDER_CONSTANT,value=(0,0,0))
+
+    buf=img2.astype('float64')
 
     # Mean and Std deviation of the RGB colors from dataset
     redmean=255*0.4401859057358472
@@ -97,13 +98,9 @@ def pasta_detection(img):
     grestd=255*0.17898858615083552
     blustd=255*0.3176466480114065
 
-    #crop input image from the center
-    net_input = buf[int(buf.shape[0]/2-net_input_size/2):int(buf.shape[0]/2+net_input_size/2), \
-    		int(buf.shape[1]/2-net_input_size/2):int(buf.shape[1]/2+net_input_size/2),:]
-
     #prepare image to input
-    net_input = net_input.reshape((net_input_size*net_input_size ,3))
-    net_input =np.transpose(net_input)
+    net_input = buf.reshape((net_input_size*net_input_size ,3))
+    net_input =np.transpose(buf)
     net_input[0,:] = net_input[0,:]-redmean
     net_input[0,:] = net_input[0,:]/redstd
     net_input[1,:] = net_input[1,:]-gremean
@@ -120,36 +117,29 @@ def pasta_detection(img):
     scores=outputs[1][0]
     bounding_boxes=outputs[2][0]
 
-    i = 0
-
     #***********FLASK*******
     result_set=[]
     #***********END OF FLASK*******
+    i = 0
     while (scores[i]>0.6):
+
+        x1=int(bounding_boxes[i][1]*im_width_out/net_input_size)
+        y1=int((bounding_boxes[i][0]-net_input_size/8)*im_height_out/(net_input_size*3/4))
+        x2=int(bounding_boxes[i][3]*im_width_out/net_input_size)
+        y2=int((bounding_boxes[i][2]-net_input_size/8)*im_height_out/(net_input_size*3/4))
 
         #***********FLASK*******
         this_object=class_names[int(objects[i])]
-        this_result = result(
-            score= scores[i],
-            object= this_object,
-            xmin= bounding_boxes[i][0]+160-(net_input_size/2),
-            xmax= bounding_boxes[i][2]+160-(net_input_size/2),
-            ymin= bounding_boxes[i][1]+120-(net_input_size/2),
-            ymax= bounding_boxes[i][3]+120-(net_input_size/2),
-            time=t2)
+        this_result = result(score= scores[i],object= this_object,
+            xmin= x1,xmax= x2,ymin= y1,ymax= y2,time=t2)
         result_set.append(this_result)
-        #***********END OF FLASK*******
-
-        x1= int(bounding_boxes[i][0]+160-(net_input_size/2))
-        x2= int(bounding_boxes[i][2]+160-(net_input_size/2))
-        y1= int(bounding_boxes[i][1]+120-(net_input_size/2))
-        y2= int(bounding_boxes[i][3]+120-(net_input_size/2))
+        #***********END OF FLASK*******# def signal_handler(signal, frame):
         object_id=int(objects[i])
         cv2.rectangle(img,(x2,y2),(x1,y1),colors[object_id%len(colors)],2)
         cv2.rectangle(img,(x1+50,y2+15),(x1,y2),colors[object_id%len(colors)],cv2.FILLED)
         cv2.putText(img,class_names[object_id],(x1,y2+10), cv2.FONT_HERSHEY_SIMPLEX, 0.4,(255,255,255),1,cv2.LINE_AA)
         i=i+1
-    #cv2.rectangle(img,(115,13),(0,0),(0,0,255),cv2.FILLED)
+
     cv2.putText(img,"inf. time: %.3fs"%last_inference_time,(3,12), cv2.FONT_HERSHEY_SIMPLEX, 0.4,(255,255,255),1,cv2.LINE_AA)
 
     #***********FLASK*******
@@ -163,27 +153,49 @@ def pasta_detection(img):
 # Pipeline 1 output
 def get_frame(sink, data):
     global appsource
+    global tlast
 
+    t1=time()
     sample = sink.emit("pull-sample")
     global_buf = sample.get_buffer()
-
+    t2=time()
     caps = sample.get_caps()
     im_height_in = caps.get_structure(0).get_value('height')
     im_width_in = caps.get_structure(0).get_value('width')
 
+    t3=time()
     mem = global_buf.get_all_memory()
+    t4=time()
     success, arr = mem.map(Gst.MapFlags.READ)
     if success == True:
-        img = np.ndarray((im_height_in,im_width_in,3),buffer=arr.data,dtype=np.uint8)
-        img = cv2.resize(img, (im_width_out, im_height_out), interpolation = cv2.INTER_NEAREST)
+        img = np.ndarray(shape=(im_height_in, im_width_in, 3), \
+        buffer=buffer.extract_dup(0, global_buf.get_size()), \
+        dtype=np.uint8)
+
+        #img = np.ndarray((im_height_in,im_width_in,3),buffer=arr.data,dtype=np.uint8)
+        t5=time()
         pasta_detection(img)
-    img = np.array(img,dtype=np.uint8)
-    img = np.reshape(img,(im_width_out*im_height_out*3))
-    gst_buf = Gst.Buffer.new_allocate(None, im_width_out*im_height_out*3, None)
-    gst_buf.fill(0, img)
-    appsource.push_buffer(gst_buf)
+        t6=time()
+
+    appsource.emit("push-buffer", Gst.Buffer.new_wrapped(img.tobytes()))
+    t7=time()
     mem.unmap(arr)
     gc.collect()
+
+    try:
+        print("FRAME:",time()-tlast,"FPS:",1/(time()-tlast))
+    except:
+        print("first frame")
+    tlast=time()
+
+    print("t2=",100*(t2-t1)/(t7-t1),"%")
+    print("t3=",100*(t3-t2)/(t7-t1),"%")
+    print("t4=",100*(t4-t3)/(t7-t1),"%")
+    print("t5=",100*(t5-t4)/(t7-t1),"%")
+    print("t6=",100*(t6-t5)/(t7-t1),"%")
+    print("t7=",100*(t7-t6)/(t7-t1),"%")
+    print("TOTAL=",t7-t1)
+
     return Gst.FlowReturn.OK
 
 def main():
@@ -199,32 +211,18 @@ def main():
     # Gstreamer Init
     Gst.init(None)
 
-    try:
-        f = open("/dev/video0")
-        input_src="v4l2src device=/dev/video0"
-        f.close()
-    except FileNotFoundError:
-        input_src="v4l2src device=/dev/video4"
-
-    pipeline1_cmd=input_src+" ! capsfilter caps=video/x-raw,format=RGB ! \
-        appsink sync=False name=sink max-buffers=1 drop=True max-buffers=1 \
+    pipeline1_cmd="v4l2src device=/dev/video0 ! capsfilter caps=video/x-raw,format=RGB ! videoconvert ! \
+        queue ! appsink sync=False name=sink max-buffers=1 drop=True max-buffers=1 \
         qos=False sync=False emit-signals=True"
+
+    pipeline2_cmd = "appsrc name=appsource1 is-live=True block=True ! \
+        video/x-raw,format=RGB,width="+str(im_width_out)+",height="+ \
+        str(im_height_out)+",framerate=10/1,interlace-mode=(string)progressive ! \
+        videoconvert ! v4l2sink sync=False device=/dev/video14"
 
     pipeline1 = Gst.parse_launch(pipeline1_cmd)
     appsink = pipeline1.get_by_name('sink')
     appsink.connect("new-sample", get_frame, appsink)
-
-    try:
-        f = open("/dev/video14")
-        output_sink="v4l2sink sync=False device=/dev/video14"
-        f.close()
-    except FileNotFoundError:
-        output_sink="waylandsink"
-
-    pipeline2_cmd = "appsrc name=appsource1 is-live=True block=True ! \
-        video/x-raw,format=RGB,width="+str(im_width_out)+",height="+str(im_height_out)+",\
-        framerate=10/1,interlace-mode=(string)interleaved ! \
-        videoconvert ! " + output_sink
 
     pipeline2 = Gst.parse_launch(pipeline2_cmd)
     appsource = pipeline2.get_by_name('appsource1')
@@ -239,36 +237,43 @@ def main():
         message = bus1.timed_pop_filtered(10000, Gst.MessageType.ANY)
         if message:
             if message.type == Gst.MessageType.ERROR:
-                # print("bus 1: ",message.parse_error())
-                # Free resources
+                err,debug = message.parse_error()
+                print("ERROR bus 1: ",err,debug)
                 pipeline1.set_state(Gst.State.NULL)
                 pipeline2.set_state(Gst.State.NULL)
                 break
 
+            if message.type == Gst.MessageType.WARNING:
+                err,debug = message.parse_warning()
+                print("bus 1: ",err,debug)
+
+            if message.type == Gst.MessageType.STATE_CHANGED:
+                old_state, new_state, pending_state = message.parse_state_changed()
+                print("STATE Bus 1 - Changed from ",old_state," To: ",new_state)
+
+
         message = bus2.timed_pop_filtered(10000, Gst.MessageType.ANY)
         if message:
             if message.type == Gst.MessageType.ERROR:
-                # print("bus 1: ",message.parse_error())
-                # Free resources
+                err,debug = message.parse_error()
+                print("ERROR bus 2: ",err,debug)
                 pipeline1.set_state(Gst.State.NULL)
                 pipeline2.set_state(Gst.State.NULL)
                 break
+
+            if message.type == Gst.MessageType.WARNING:
+                err,debug = message.parse_warning()
+                print("bus 2: ",err,debug)
+
+            if message.type == Gst.MessageType.STATE_CHANGED:
+                old_state, new_state, pending_state = message.parse_state_changed()
+                print("STATE Bus 2 - Changed from ",old_state," To: ",new_state)
 
     # Free resources
     pipeline1.set_state(Gst.State.NULL)
     pipeline2.set_state(Gst.State.NULL)
 
-def signal_handler(signal, frame):
-    global pipeline1
-    global pipeline2
-    pipeline1.set_state(Gst.State.NULL)
-    pipeline2.set_state(Gst.State.NULL)
-    print("exiting...")
-    sleep(10)
-    sys.exit(0)
-
 if (__name__ == "__main__"):
-    signal.signal(signal.SIGINT, signal_handler)
     thread1 = threading.Thread(target = main)
     thread1.start()
 
