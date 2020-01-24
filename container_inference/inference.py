@@ -176,8 +176,7 @@ def get_frame(sink, data):
     appsource.emit("push-buffer", Gst.Buffer.new_wrapped(img.tobytes()))
     t5=time()
     mem.unmap(arr)
-    gc.collect()
-
+    
     try:
         print("FRAME:",time()-tlast,"FPS:",1/(time()-tlast))
     except:
