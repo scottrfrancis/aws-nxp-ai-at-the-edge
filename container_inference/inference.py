@@ -114,7 +114,7 @@ def pasta_detection(img):
     tbefore = time()
     outputs = model.run({'data': net_input})
     tafter = time()
-    last_inference_time = tbefore-tafter
+    last_inference_time = tafter-tbefore
     objects=outputs[0][0]
     scores=outputs[1][0]
     bounding_boxes=outputs[2][0]
@@ -176,7 +176,7 @@ def get_frame(sink, data):
     appsource.emit("push-buffer", Gst.Buffer.new_wrapped(img.tobytes()))
     t5=time()
     mem.unmap(arr)
-    
+
     try:
         print("FRAME:",time()-tlast,"FPS:",1/(time()-tlast))
     except:
