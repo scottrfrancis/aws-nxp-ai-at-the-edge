@@ -142,6 +142,7 @@ def pasta_detection(img):
         cv2.putText(img,class_names[object_id],(x1,y2+10), cv2.FONT_HERSHEY_SIMPLEX, 0.4,(255,255,255),1,cv2.LINE_AA)
         i=i+1
 
+    cv2.rectangle(img,(110,17),(0,0),(0,0,0),cv2.FILLED)
     cv2.putText(img,"inf. time: %.3fs"%last_inference_time,(3,12), cv2.FONT_HERSHEY_SIMPLEX, 0.4,(255,255,255),1,cv2.LINE_AA)
 
     #***********FLASK*******
