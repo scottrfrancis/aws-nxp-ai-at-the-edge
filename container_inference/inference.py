@@ -86,6 +86,7 @@ def pasta_detection(img):
     global last_inference
     global tbefore
     global tafter
+    global t_between_frames
     #******** INSERT YOUR INFERENCE HERE ********
     img2 = cv2.resize(img, (net_input_size,int(net_input_size/4*3)))#, interpolation = cv2.INTER_NEAREST)
     img2 = cv2.copyMakeBorder(img2,int(net_input_size/8),int(net_input_size/8),0,0,cv2.BORDER_CONSTANT,value=(0,0,0))
@@ -113,6 +114,7 @@ def pasta_detection(img):
     #Run the model
     tbefore = time()
     outputs = model.run({'data': net_input})
+    #outputs = [[[0]],[[0]],[[0]]]
     tafter = time()
     last_inference_time = tafter-tbefore
     objects=outputs[0][0]
@@ -142,8 +144,8 @@ def pasta_detection(img):
         cv2.putText(img,class_names[object_id],(x1,y2+10), cv2.FONT_HERSHEY_SIMPLEX, 0.4,(255,255,255),1,cv2.LINE_AA)
         i=i+1
 
-    cv2.rectangle(img,(110,17),(0,0),(0,0,0),cv2.FILLED)
-    cv2.putText(img,"inf. time: %.3fs"%last_inference_time,(3,12), cv2.FONT_HERSHEY_SIMPLEX, 0.4,(255,255,255),1,cv2.LINE_AA)
+    cv2.rectangle(img,(187,17),(0,0),(0,0,0),cv2.FILLED)
+    cv2.putText(img,"inf. time: %.3fs"%last_inference_time+" fps: %.2fs"%(1/t_between_frames),(3,12), cv2.FONT_HERSHEY_SIMPLEX, 0.4,(255,255,255),1,cv2.LINE_AA)
 
     #***********FLASK*******
     last_inference = inference(tbefore,last_inference_time,result_set)
@@ -159,6 +161,15 @@ def get_frame(sink, data):
     global tlast
     global tbefore
     global tafter
+    global t_between_frames
+
+    try:
+        print("FRAME:",time()-tlast,"FPS:",1/(time()-tlast))
+        t_between_frames = time()-tlast
+    except:
+        print("first frame")
+        t_between_frames = 0
+    tlast=time()
 
     t0=time()
     sample = sink.emit("pull-sample")
@@ -178,22 +189,16 @@ def get_frame(sink, data):
     t5=time()
     mem.unmap(arr)
 
-    try:
-        print("FRAME:",time()-tlast,"FPS:",1/(time()-tlast))
-    except:
-        print("first frame")
-    tlast=time()
-
     ttotal = tlast-t0
-    print("t1=",(t1-t0)," - ",100*(t1-t0)/(ttotal),"%")
-    print("t2=",(t2-t1)," - ",100*(t2-t1)/(ttotal),"%")
-    print("t3=",(t3-t2)," - ",100*(t3-t2)/(ttotal),"%")
-    print("t4a=",(tbefore-t3)," - ",100*(tbefore-t3)/(ttotal),"%")
-    print("t4b=",(tafter-tbefore)," - ",100*(tafter-tbefore)/(ttotal),"%")
-    print("t4c=",(t4-tafter)," - ",100*(t4-tafter)/(ttotal),"%")
-    print("t5=",(t5-t4)," - ",100*(t5-t4)/(ttotal),"%")
-    print("t6=",(tlast-t5)," - ",100*(tlast-t5)/(ttotal),"%")
-    print("TOTAL=",ttotal)
+    print("t1 =%.5f"%(t1-t0)," - ","%.1f"%(100*(t1-t0)/(ttotal)),"%")
+    print("t2 =%.5f"%(t2-t1)," - ","%.1f"%(100*(t2-t1)/(ttotal)),"%")
+    print("t3 =%.5f"%(t3-t2)," - ","%.1f"%(100*(t3-t2)/(ttotal)),"%")
+    print("t4a=%.5f"%(tbefore-t3)," - ","%.1f"%(100*(tbefore-t3)/(ttotal)),"%")
+    print("t4b=%.5f"%(tafter-tbefore)," - ","%.1f"%(100*(tafter-tbefore)/(ttotal)),"%")
+    print("t4c=%.5f"%(t4-tafter)," - ","%.1f"%(100*(t4-tafter)/(ttotal)),"%")
+    print("t5 =%.5f"%(t5-t4)," - ","%.1f"%(100*(t5-t4)/(ttotal)),"%")
+    print("t6 =%.5f"%(tlast-t5)," - ","%.1f"%(100*(tlast-t5)/(ttotal)),"%")
+    print("TOTAL=%.5f"%ttotal)
 
     return Gst.FlowReturn.OK
 
@@ -210,7 +215,8 @@ def main():
     # Gstreamer Init
     Gst.init(None)
 
-    pipeline1_cmd="v4l2src device=/dev/video0 do-timestamp=True ! queue leaky=downstream ! videoscale n-threads=4 ! \
+    pipeline1_cmd="v4l2src device=/dev/video0 do-timestamp=True ! queue leaky=downstream ! \
+        videoscale n-threads=4 method=nearest-neighbour ! \
         video/x-raw,format=RGB,width="+str(im_width_out)+",height="+str(im_height_out)+" ! \
         queue leaky=downstream ! appsink name=sink max-buffers=5 \
         drop=True max-buffers=3 emit-signals=True"
