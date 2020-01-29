@@ -15,7 +15,7 @@ im_height_out = 480
 #im_width_out = 2592
 #im_height_out = 1944
 
-net_input_size= 240
+nn_input_size= 240
 
 class_names =['shell','elbow','penne','tortellini','farfalle']
 colors=[(0xFF,0x83,0x00),(0xFF,0x66,0x00),(0xFF,0x00,0x00),(0x99,0xFF,0x00),(0x00,0x00,0xFF),(0x00,0xFF,0x00)]
@@ -88,32 +88,27 @@ def pasta_detection(img):
     global tafter
     global t_between_frames
     #******** INSERT YOUR INFERENCE HERE ********
-    img2 = cv2.resize(img, (net_input_size,int(net_input_size/4*3)))#, interpolation = cv2.INTER_NEAREST)
-    img2 = cv2.copyMakeBorder(img2,int(net_input_size/8),int(net_input_size/8),0,0,cv2.BORDER_CONSTANT,value=(0,0,0))
-
-    buf=img2.astype('float64')
+    nn_input=cv2.resize(img, (nn_input_size,int(nn_input_size/4*3)))#, interpolation = cv2.INTER_NEAREST)
+    nn_input=cv2.copyMakeBorder(nn_input,int(nn_input_size/8),int(nn_input_size/8),0,0,cv2.BORDER_CONSTANT,value=(0,0,0))
 
     # Mean and Std deviation of the RGB colors from dataset
-    redmean=255*0.4401859057358472
-    gremean=255*0.5057172186334968
-    blumean=255*0.5893379173439015
-    redstd=255*0.24873837809532068
-    grestd=255*0.17898858615083552
-    blustd=255*0.3176466480114065
+    mean=[123.68,116.779,103.939]
+    std=[58.393,57.12,57.375] #ALTERAAAAAAAAARRR
 
     #prepare image to input
-    net_input = buf.reshape((net_input_size*net_input_size ,3))
-    net_input =np.transpose(buf)
-    net_input[0,:] = net_input[0,:]-redmean
-    net_input[0,:] = net_input[0,:]/redstd
-    net_input[1,:] = net_input[1,:]-gremean
-    net_input[1,:] = net_input[1,:]/grestd
-    net_input[2,:] = net_input[2,:]-blumean
-    net_input[2,:] = net_input[2:]/blustd
+    nn_input=nn_input.astype('float64')
+    nn_input=nn_input.reshape((nn_input_size*nn_input_size ,3))
+    nn_input=np.transpose(nn_input)
+    nn_input[0,:] = nn_input[0,:]-mean[0]
+    nn_input[0,:] = nn_input[0,:]/std[0]
+    nn_input[1,:] = nn_input[1,:]-mean[1]
+    nn_input[1,:] = nn_input[1,:]/std[1]
+    nn_input[2,:] = nn_input[2,:]-mean[2]
+    nn_input[2,:] = nn_input[2,:]/std[2]
 
     #Run the model
     tbefore = time()
-    outputs = model.run({'data': net_input})
+    outputs = model.run({'data': nn_input})
     #outputs = [[[0]],[[0]],[[0]]]
     tafter = time()
     last_inference_time = tafter-tbefore
@@ -127,10 +122,10 @@ def pasta_detection(img):
     i = 0
     while (scores[i]>0.4):
 
-        x1=int(bounding_boxes[i][1]*im_width_out/net_input_size)
-        y1=int((bounding_boxes[i][0]-net_input_size/8)*im_height_out/(net_input_size*3/4))
-        x2=int(bounding_boxes[i][3]*im_width_out/net_input_size)
-        y2=int((bounding_boxes[i][2]-net_input_size/8)*im_height_out/(net_input_size*3/4))
+        x1=int(bounding_boxes[i][1]*im_width_out/nn_input_size)
+        y1=int((bounding_boxes[i][0]-nn_input_size/8)*im_height_out/(nn_input_size*3/4))
+        x2=int(bounding_boxes[i][3]*im_width_out/nn_input_size)
+        y2=int((bounding_boxes[i][2]-nn_input_size/8)*im_height_out/(nn_input_size*3/4))
 
         #***********FLASK*******
         this_object=class_names[int(objects[i])]
@@ -189,7 +184,7 @@ def get_frame(sink, data):
     t5=time()
     mem.unmap(arr)
 
-    ttotal = tlast-t0
+    ttotal = time()-t0
     print("t1 =%.5f"%(t1-t0)," - ","%.1f"%(100*(t1-t0)/(ttotal)),"%")
     print("t2 =%.5f"%(t2-t1)," - ","%.1f"%(100*(t2-t1)/(ttotal)),"%")
     print("t3 =%.5f"%(t3-t2)," - ","%.1f"%(100*(t3-t2)/(ttotal)),"%")
