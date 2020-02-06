@@ -9,13 +9,14 @@ import gc
 import cv2
 from queue import Queue
 import threading
+import datetime
 
-im_width_out = 640
-im_height_out = 480
-#im_width_out = 2592
-#im_height_out = 1944
+width_out = 640
+height_out = 480
+#width_out = 2592
+#height_out = 1944
 
-nn_input_size= 240
+nn_input_size= 128
 
 class_names =['shell','elbow','penne','tortellini','farfalle']
 colors=[(0xFF,0x83,0x00),(0xFF,0x66,0x00),(0xFF,0x00,0x00),(0x99,0xFF,0x00),(0x00,0x00,0xFF),(0x00,0xFF,0x00)]
@@ -88,12 +89,13 @@ def pasta_detection(img):
     global tafter
     global t_between_frames
     #******** INSERT YOUR INFERENCE HERE ********
+
     nn_input=cv2.resize(img, (nn_input_size,int(nn_input_size/4*3)))#, interpolation = cv2.INTER_NEAREST)
     nn_input=cv2.copyMakeBorder(nn_input,int(nn_input_size/8),int(nn_input_size/8),0,0,cv2.BORDER_CONSTANT,value=(0,0,0))
 
     # Mean and Std deviation of the RGB colors from dataset
-    mean=[123.68,116.779,103.939]
-    std=[58.393,57.12,57.375] #ALTERAAAAAAAAARRR
+    mean=[112.247175,128.957835,150.280935]
+    std=[63.42819,45.64194,80.99973]
 
     #prepare image to input
     nn_input=nn_input.astype('float64')
@@ -108,8 +110,11 @@ def pasta_detection(img):
 
     #Run the model
     tbefore = time()
+    print("run in")
+    print(datetime.datetime.now().time())
     outputs = model.run({'data': nn_input})
     #outputs = [[[0]],[[0]],[[0]]]
+    print("run out")
     tafter = time()
     last_inference_time = tafter-tbefore
     objects=outputs[0][0]
@@ -121,11 +126,10 @@ def pasta_detection(img):
     #***********END OF FLASK*******
     i = 0
     while (scores[i]>0.4):
-
-        x1=int(bounding_boxes[i][1]*im_width_out/nn_input_size)
-        y1=int((bounding_boxes[i][0]-nn_input_size/8)*im_height_out/(nn_input_size*3/4))
-        x2=int(bounding_boxes[i][3]*im_width_out/nn_input_size)
-        y2=int((bounding_boxes[i][2]-nn_input_size/8)*im_height_out/(nn_input_size*3/4))
+        y1=int((bounding_boxes[i][1]-nn_input_size/8)*width_out/nn_input_size)
+        x1=int((bounding_boxes[i][0])*height_out/(nn_input_size*3/4))
+        y2=int((bounding_boxes[i][3]-nn_input_size/8)*width_out/nn_input_size)
+        x2=int((bounding_boxes[i][2])*height_out/(nn_input_size*3/4))
 
         #***********FLASK*******
         this_object=class_names[int(objects[i])]
@@ -139,8 +143,9 @@ def pasta_detection(img):
         cv2.putText(img,class_names[object_id],(x1,y2+10), cv2.FONT_HERSHEY_SIMPLEX, 0.4,(255,255,255),1,cv2.LINE_AA)
         i=i+1
 
-    cv2.rectangle(img,(187,17),(0,0),(0,0,0),cv2.FILLED)
-    cv2.putText(img,"inf. time: %.3fs"%last_inference_time+" fps: %.2fs"%(1/t_between_frames),(3,12), cv2.FONT_HERSHEY_SIMPLEX, 0.4,(255,255,255),1,cv2.LINE_AA)
+    cv2.rectangle(img,(115,17),(0,0),(0,0,0),cv2.FILLED)
+    #cv2.putText(img,"inf. time: %.3fs"%last_inference_time+" fps: %.2f"%(1/t_between_frames),(3,12), cv2.FONT_HERSHEY_SIMPLEX, 0.4,(255,255,255),1,cv2.LINE_AA)
+    cv2.putText(img,"inf. time: %.3fs"%last_inference_time,(3,12), cv2.FONT_HERSHEY_SIMPLEX, 0.4,(255,255,255),1,cv2.LINE_AA)
 
     #***********FLASK*******
     last_inference = inference(tbefore,last_inference_time,result_set)
@@ -163,7 +168,7 @@ def get_frame(sink, data):
         t_between_frames = time()-tlast
     except:
         print("first frame")
-        t_between_frames = 0
+        t_between_frames = 1
     tlast=time()
 
     t0=time()
@@ -192,7 +197,7 @@ def get_frame(sink, data):
     print("t4b=%.5f"%(tafter-tbefore)," - ","%.1f"%(100*(tafter-tbefore)/(ttotal)),"%")
     print("t4c=%.5f"%(t4-tafter)," - ","%.1f"%(100*(t4-tafter)/(ttotal)),"%")
     print("t5 =%.5f"%(t5-t4)," - ","%.1f"%(100*(t5-t4)/(ttotal)),"%")
-    print("t6 =%.5f"%(tlast-t5)," - ","%.1f"%(100*(tlast-t5)/(ttotal)),"%")
+    print("t6 =%.5f"%(time()-t5)," - ","%.1f"%(100*(time()-t5)/(ttotal)),"%")
     print("TOTAL=%.5f"%ttotal)
 
     return Gst.FlowReturn.OK
@@ -210,15 +215,15 @@ def main():
     # Gstreamer Init
     Gst.init(None)
 
-    pipeline1_cmd="v4l2src device=/dev/video0 do-timestamp=True ! queue leaky=downstream ! \
+    pipeline1_cmd="v4l2src device=/dev/video0 do-timestamp=True ! \
         videoscale n-threads=4 method=nearest-neighbour ! \
-        video/x-raw,format=RGB,width="+str(im_width_out)+",height="+str(im_height_out)+" ! \
-        queue leaky=downstream ! appsink name=sink max-buffers=5 \
-        drop=True max-buffers=3 emit-signals=True"
+        video/x-raw,format=RGB,width="+str(width_out)+",height="+str(height_out)+" ! \
+        queue leaky=downstream max-size-buffers=1 ! appsink name=sink \
+        drop=True max-buffers=1 emit-signals=True"
 
     pipeline2_cmd = "appsrc name=appsource1 is-live=True block=True ! \
-        video/x-raw,format=RGB,width="+str(im_width_out)+",height="+ \
-        str(im_height_out)+",framerate=10/1,interlace-mode=(string)progressive ! \
+        video/x-raw,format=RGB,width="+str(width_out)+",height="+ \
+        str(height_out)+",framerate=20/1,interlace-mode=(string)progressive ! \
         videoconvert ! v4l2sink max-lateness=8000000000 device=/dev/video14"
 
     pipeline1 = Gst.parse_launch(pipeline1_cmd)
