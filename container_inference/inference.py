@@ -13,11 +13,7 @@ import datetime
 
 width_out = 640
 height_out = 480
-#width_out = 2592
-#height_out = 1944
-
 nn_input_size= 128
-
 class_names =['shell','elbow','penne','tortellini','farfalle']
 colors=[(0xFF,0x83,0x00),(0xFF,0x66,0x00),(0xFF,0x00,0x00),(0x99,0xFF,0x00),(0x00,0x00,0xFF),(0x00,0xFF,0x00)]
 
@@ -110,11 +106,7 @@ def pasta_detection(img):
 
     #Run the model
     tbefore = time()
-    print("run in")
-    print(datetime.datetime.now().time())
     outputs = model.run({'data': nn_input})
-    #outputs = [[[0]],[[0]],[[0]]]
-    print("run out")
     tafter = time()
     last_inference_time = tafter-tbefore
     objects=outputs[0][0]
@@ -158,47 +150,18 @@ def pasta_detection(img):
 # Pipeline 1 output
 def get_frame(sink, data):
     global appsource
-    global tlast
-    global tbefore
-    global tafter
-    global t_between_frames
 
-    try:
-        print("FRAME:",time()-tlast,"FPS:",1/(time()-tlast))
-        t_between_frames = time()-tlast
-    except:
-        print("first frame")
-        t_between_frames = 1
-    tlast=time()
-
-    t0=time()
     sample = sink.emit("pull-sample")
     global_buf = sample.get_buffer()
     caps = sample.get_caps()
     im_height_in = caps.get_structure(0).get_value('height')
     im_width_in = caps.get_structure(0).get_value('width')
     mem = global_buf.get_all_memory()
-    t1=time()
     success, arr = mem.map(Gst.MapFlags.READ)
-    t2=time()
     img = np.ndarray((im_height_in,im_width_in,3),buffer=arr.data,dtype=np.uint8)
-    t3=time()
     pasta_detection(img)
-    t4=time()
     appsource.emit("push-buffer", Gst.Buffer.new_wrapped(img.tobytes()))
-    t5=time()
     mem.unmap(arr)
-
-    ttotal = time()-t0
-    print("t1 =%.5f"%(t1-t0)," - ","%.1f"%(100*(t1-t0)/(ttotal)),"%")
-    print("t2 =%.5f"%(t2-t1)," - ","%.1f"%(100*(t2-t1)/(ttotal)),"%")
-    print("t3 =%.5f"%(t3-t2)," - ","%.1f"%(100*(t3-t2)/(ttotal)),"%")
-    print("t4a=%.5f"%(tbefore-t3)," - ","%.1f"%(100*(tbefore-t3)/(ttotal)),"%")
-    print("t4b=%.5f"%(tafter-tbefore)," - ","%.1f"%(100*(tafter-tbefore)/(ttotal)),"%")
-    print("t4c=%.5f"%(t4-tafter)," - ","%.1f"%(100*(t4-tafter)/(ttotal)),"%")
-    print("t5 =%.5f"%(t5-t4)," - ","%.1f"%(100*(t5-t4)/(ttotal)),"%")
-    print("t6 =%.5f"%(time()-t5)," - ","%.1f"%(100*(time()-t5)/(ttotal)),"%")
-    print("TOTAL=%.5f"%ttotal)
 
     return Gst.FlowReturn.OK
 
