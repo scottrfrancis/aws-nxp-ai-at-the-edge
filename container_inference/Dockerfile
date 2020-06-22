@@ -1,37 +1,68 @@
-FROM torizon/arm64v8-debian-base
-
+FROM torizon/arm64v8-debian-wayland-base-vivante
 WORKDIR /home/torizon
 
-RUN apt update
-RUN apt install -y libgstreamer1.0-0 gstreamer1.0-plugins-base \
+#### INSTALL DEPENDENCIES ####
+RUN apt-get -y update && apt-get install -y \
+    libopencl-vivante1 \
+    libopencl-vivante1-dev \
+    libclc-vivante1 \
+    libllvm-vivante1 \
+    libgal-vivante1 \
+    libvsc-vivante1 \
+    && apt-get clean && apt-get autoremove
+
+RUN apt-get -y update && apt-get install -y \
+    python3 python3-dev libatlas-base-dev \
+    cmake build-essential gcc g++ git \
+    && apt-get clean && apt-get autoremove
+
+RUN apt-get install -y python3-pil python3-numpy python3-setuptools \
+    && apt-get clean && apt-get autoremove
+
+#### INSTALL OPENCV ####
+RUN apt-get -y update && apt-get install -y \
+    pkg-config libavcodec-dev libavformat-dev libswscale-dev \
+    libtbb2 libtbb-dev libjpeg-dev libpng-dev libdc1394-22-dev \
+    libdc1394-22-dev protobuf-compiler libgflags-dev libgoogle-glog-dev libblas-dev \
+    libhdf5-serial-dev liblmdb-dev libleveldb-dev liblapack-dev \
+    libsnappy-dev libprotobuf-dev libopenblas-dev \
+    libboost-dev libboost-all-dev libeigen3-dev libatlas-base-dev libne10-10 libne10-dev \
+    && apt-get clean && apt-get autoremove
+
+RUN git clone https://github.com/opencv/opencv.git
+RUN cd opencv && git checkout 4.2.0 && mkdir -p build && cd build && cmake \
+  -DWITH_OPENGL=ON -DWITH_TBB=ON -DWITH_PTHREADS_PF=ON  \
+  -DCMAKE_BUILD_TYPE=RELEASE  -DWITH_OPENCL=ON -DWITH_CSTRIPES=ON \
+  -DWITH_VULKAN=ON -DENABLE_PRECOMPILED_HEADERS=OFF \
+	-DWITH_OPENVX=ON -DWITH_V4L=ON -DWITH_LIBV4L=ON \
+	-DENABLE_NEON=ON -DENABLE_TBB=ON-DENABLE_IPP=ON -DENABLE_VFVP3=ON \
+  ../ && make -j`nproc` && make install
+
+#### INSTALL GSTREAMER ####
+RUN apt-get -y update && apt-get install -y \
+    libgstreamer1.0-0 gstreamer1.0-plugins-base \
     gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly \
     gstreamer1.0-libav gstreamer1.0-doc gstreamer1.0-tools gstreamer1.0-x \
     gstreamer1.0-alsa gstreamer1.0-gl gstreamer1.0-gtk3 gstreamer1.0-qt5 \
-    gstreamer1.0-pulseaudio
+    gstreamer1.0-pulseaudio v4l-utils python3-gst-1.0 \
+    && apt-get clean && apt-get autoremove
 
-RUN apt install -y python3 python3-pip python3-gst-1.0 python3-dev gcc pkg-config
-RUN apt install -y libcairo2-dev libjpeg-dev libgif-dev
-RUN apt install -y python3-gi gobject-introspection gir1.2-gtk-3.0 python3-gi-cairo
-
-RUN pip3 install setuptools wheel pycairo
-RUN pip3 install numpy Pillow
-RUN pip3 install imageio requests flask flask_restful flask_cors
-
-RUN apt install -y build-essential cmake git
+#### INSTALL DLR ####
 RUN git clone --recursive https://github.com/neo-ai/neo-ai-dlr.git
-#RUN cd neo-ai-dlr;git checkout v1.0;mkdir build;cd build;cmake ..;make -j`nproc`
 RUN cd neo-ai-dlr;mkdir build;cd build;cmake ..;make -j`nproc`
 RUN cd neo-ai-dlr/python;python3 setup.py install --user
 
-RUN mkdir common_util
-COPY resources/common_util common_util
+# Install Flask
+RUN apt-get -y update && apt-get install -y \
+    python3-pip \
+    && apt-get clean && apt-get autoremove
 
-RUN mkdir model
-COPY resources/model model
+RUN pip3 install requests flask flask_restful flask_cors \
+    && apt-get clean && apt-get autoremove
 
-#COPY resources/inference.py .
-COPY v2 .
+# Copy project files
+RUN mkdir -p model
+COPY model model
+COPY inference.py .
 
-ENTRYPOINT python3 inference.py
-
-#ENTRYPOINT gst-launch-1.0 v4l2src device=/dev/video4 ! "video/x-raw, width=320, height=240" ! videoconvert ! videoscale ! v4l2sink device=/dev/video14 sync=false
+ENTRYPOINT v4l2-ctl -d /dev/video0 -p 15;v4l2-ctl -c auto_white_balance=1;v4l2-ctl -c auto_gain=1; v4l2-ctl -c exposure_auto=1;python3 inference.py
